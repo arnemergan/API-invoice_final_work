@@ -2,6 +2,7 @@ package com.api.invoice;
 import com.api.invoice.exceptions.InvoiceNotFoundException;
 import com.api.invoice.models.Invoice;
 import com.api.invoice.models.Line;
+import com.api.invoice.models.UpdateInvoice;
 import com.api.invoice.models.Vendor;
 import com.api.invoice.services.InvoiceServiceClass;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -14,6 +15,8 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+
+import javax.persistence.criteria.CriteriaBuilder;
 import java.util.Vector;
 
 import static org.mockito.BDDMockito.given;
@@ -85,12 +88,13 @@ public class InvoicesTests {
 
     @Test
     public void shouldUpdateInvoice() throws Exception{
-        Invoice invoice = new Invoice();
+        Invoice inv = new Invoice();
+        UpdateInvoice invoice = new UpdateInvoice();
         invoice.setSubtotal(400.00);
         ObjectMapper objectMapper = new ObjectMapper();
-        given(invoiceService.updateInvoice(invoice.getId(),invoice)).willReturn(invoice);
+        given(invoiceService.updateInvoice(inv.getId(),invoice)).willReturn(inv);
 
-        this.mvc.perform(put("/invoices/update/" + invoice.getId()).contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(new Invoice())))
+        this.mvc.perform(put("/invoices/update/" + inv.getId()).contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(new Invoice())))
                 .andExpect(status().isOk());
     }
 

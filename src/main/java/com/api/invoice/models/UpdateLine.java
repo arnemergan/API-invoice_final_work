@@ -1,47 +1,33 @@
 package com.api.invoice.models;
 
-import org.springframework.beans.factory.annotation.Value;
-
-import javax.persistence.Entity;
-import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.validation.constraints.*;
-import java.util.UUID;
 
-@Entity
-public class Line {
-    @Id
-    private String id;
+public class UpdateLine {
+    @NotEmpty(message = "line.description cannot be empty")
     private String description;
-    @PositiveOrZero(message = "field must be positive")
+    @NotNull(message = "line.unitprice cannot be empty")
+    @PositiveOrZero(message = "line.unitprice must be positive")
     private Double unitPrice;
-    @PositiveOrZero(message = "field must be positive")
+    @NotNull(message = "line.quantity cannot be empty")
+    @PositiveOrZero(message = "line.quantity must be positive")
     private Integer quantity;
     @Min(0)
     @Max(21)
     private Integer vat;
-    @PositiveOrZero(message = "field must be positive")
+    @PositiveOrZero(message = "line.amount must be positive")
     private Double amount;
-    @ManyToOne
-    @JoinColumn
-    private Invoice invoice;
 
-    public Line(){
-        id = UUID.randomUUID().toString();
+    public UpdateLine(){
     }
 
-    public Line(String description, Double amount, Integer quantity, Integer vat) {
-        id = UUID.randomUUID().toString();
+    public UpdateLine(String description, Double amount, Integer quantity, Integer vat) {
         this.description = description;
         this.unitPrice = unitPrice;
         this.quantity = quantity;
         this.vat = vat;
         this.amount = amount;
-    }
-
-    public String getId() {
-        return id;
     }
 
     public String getDescription() {

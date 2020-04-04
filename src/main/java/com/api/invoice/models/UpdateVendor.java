@@ -1,40 +1,32 @@
 package com.api.invoice.models;
-
-import javax.persistence.*;
 import javax.validation.constraints.Email;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Pattern;
-import java.util.Set;
 import java.util.UUID;
 
-@Entity
-public class Vendor {
-    @Id
-    private String id;
+public class UpdateVendor {
+    @NotEmpty(message = "vendor.name cannot be empty")
     private String name;
+    @NotEmpty(message = "vendor.address cannot be empty")
     private String address;
-    @Pattern(regexp = "^[+]*[(]{0,1}[0-9]{1,4}[)]{0,1}[-\\s\\./0-9]*$", message = "phone must be a valid phone number")
+    @NotEmpty(message = "vendor.phone cannot be empty")
+    @Pattern(regexp = "^[+]*[(]{0,1}[0-9]{1,4}[)]{0,1}[-\\s\\./0-9]*$", message = "vendor.phone must be a valid phone number")
     private String phone;
-    @Email(message = "email must be a valid email")
+    @NotEmpty(message = "vendor.email cannot be empty")
+    @Email(message = "vendor.email must be a valid email")
     private String email;
-    @Pattern(regexp = "[A-Za-z]{2}[0-9|\\s]{8,15}$",message = "vatNumber must be a valid VATNumber")
+    @NotEmpty(message = "vendor.vatNumber cannot be empty")
+    @Pattern(regexp = "[A-Za-z]{2}[0-9|\\s]{8,15}$",message = "vendor.vatNumber must be a valid VATNumber")
     private String vatNumber;
-    @Transient
-    @OneToMany(mappedBy = "vendor", cascade = CascadeType.ALL)
-    private Set<Invoice> invoices;
 
-    public Vendor(){};
+    public UpdateVendor(){};
 
-    public Vendor(String name, String address, String phone, String email, String vatNumber) {
-        id = UUID.randomUUID().toString();
+    public UpdateVendor(String name, String address, String phone, String email, String vatNumber) {
         this.name = name;
         this.address = address;
         this.phone = phone;
         this.email = email;
         this.vatNumber = vatNumber;
-    }
-
-    public String getId() {
-        return id;
     }
 
     public String getName() {

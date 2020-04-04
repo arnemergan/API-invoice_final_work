@@ -1,52 +1,42 @@
 package com.api.invoice.models;
-
-import org.bson.types.Binary;
-import org.springframework.data.annotation.ReadOnlyProperty;
-
 import javax.persistence.*;
 import javax.validation.Valid;
 import javax.validation.constraints.*;
 import java.util.List;
-import java.util.UUID;
 
-@Entity
-public class Invoice {
-    @Id
-    private String id;
+public class UpdateInvoice {
+    @NotEmpty(message = "number cannot be empty")
     private String number;
-    private String status;
-    private List<String> errors;
-    @Pattern(regexp = "^([0-2][0-9]|(3)[0-1])(\\/)(((0)[0-9])|((1)[0-2]))(\\/)\\d{4}$", message = "field must be a valid date")
+    @NotEmpty(message = "duedate cannot be empty")
+    @Pattern(regexp = "^([0-2][0-9]|(3)[0-1])(\\/)(((0)[0-9])|((1)[0-2]))(\\/)\\d{4}$", message = "duedate must be a valid date")
     private String dueDate;
-    @Pattern(regexp = "^([0-2][0-9]|(3)[0-1])(\\/)(((0)[0-9])|((1)[0-2]))(\\/)\\d{4}$", message = "field must be a valid date")
+    @NotEmpty(message = "invoicedate cannot be empty")
+    @Pattern(regexp = "^([0-2][0-9]|(3)[0-1])(\\/)(((0)[0-9])|((1)[0-2]))(\\/)\\d{4}$", message = "invoicedate must be a valid date")
     private String invoiceDate;
-    @PositiveOrZero(message = "field must be positive")
+    @NotNull(message = "subtotal cannot be empty")
+    @PositiveOrZero(message = "subtotal must be positive")
     private Double subtotal;
-    @Min(value = 0,message = "field must be between 0 and 21")
-    @Max(value = 21,message = "field must be between 0 and 21")
+    @NotNull(message = "vat cannot be empty")
+    @Min(value = 0,message = "vat must be between 0 and 21")
+    @Max(value = 21,message = "vat must be between 0 and 21")
     private Double VAT;
+    @NotNull(message = "discount cannot be empty")
     @PositiveOrZero(message = "field must be positive")
     private Double discount;
+    @NotNull(message = "total cannot be empty")
     @PositiveOrZero(message = "field must be positive")
     private Double total;
+    @NotEmpty(message = "currency cannot be empty")
     private String currency;
-    @ReadOnlyProperty
-    private Binary image;
+    @NotNull(message = "vendor cannot be empty")
     @ManyToOne
     @JoinColumn
     @Valid
-    private Vendor vendor;
+    private UpdateVendor vendor;
     @OneToMany(mappedBy = "invoice", cascade = CascadeType.ALL)
-    private List<@Valid Line> lines;
+    private List<@Valid UpdateLine> lines;
 
-    public Invoice(){
-        this.id = UUID.randomUUID().toString();
-    }
-
-    public Invoice(Double discount, String number, List<String> errors, String dueDate, String invoiceDate, Double subtotal, Double VAT, Double total, String currency, Binary image, Vendor vendor, List<Line> lines) {
-        this.errors = errors;
-        this.image = image;
-        this.id = UUID.randomUUID().toString();
+    public UpdateInvoice(Double discount, String number, String dueDate, String invoiceDate, Double subtotal, Double VAT, Double total, String currency, UpdateVendor vendor, List<UpdateLine> lines) {
         this.number = number;
         this.dueDate = dueDate;
         this.invoiceDate = invoiceDate;
@@ -59,16 +49,8 @@ public class Invoice {
         this.lines = lines;
     }
 
-    public String getId() {
-        return id;
-    }
+    public UpdateInvoice(){
 
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
     }
 
     public String getDueDate() {
@@ -119,19 +101,19 @@ public class Invoice {
         this.currency = currency;
     }
 
-    public Vendor getVendor() {
+    public UpdateVendor getVendor() {
         return vendor;
     }
 
-    public void setVendor(Vendor vendor) {
+    public void setVendor(UpdateVendor vendor) {
         this.vendor = vendor;
     }
 
-    public List<Line> getLines() {
+    public List<UpdateLine> getLines() {
         return lines;
     }
 
-    public void setLines(List<Line> products) {
+    public void setLines(List<UpdateLine> products) {
         this.lines = products;
     }
 
@@ -149,21 +131,5 @@ public class Invoice {
 
     public void setDiscount(Double discount) {
         this.discount = discount;
-    }
-
-    public Binary getImage() {
-        return image;
-    }
-
-    public void setImage(Binary image) {
-        this.image = image;
-    }
-
-    public List<String> getErrors() {
-        return errors;
-    }
-
-    public void setErrors(List<String> errors) {
-        this.errors = errors;
     }
 }
