@@ -40,7 +40,7 @@ public class InvoiceServiceClass implements InvoiceService {
     @Autowired
     private InvoicesRepo invoiceRepository;
 
-    private final String uri = "http://localhost:5000/api/v1/ocr?language=";
+    private final String uri = "https://python-final-work.herokuapp.com/api/v1/ocr?language=";
 
     @Override
     public Invoice getInvoice(String id) {
