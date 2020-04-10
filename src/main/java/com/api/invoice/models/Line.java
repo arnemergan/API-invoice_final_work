@@ -1,6 +1,7 @@
 package com.api.invoice.models;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -9,7 +10,7 @@ import javax.persistence.ManyToOne;
 import javax.validation.constraints.*;
 import java.util.UUID;
 
-@Entity
+@Document
 public class Line {
     @Id
     private String id;

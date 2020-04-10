@@ -1,18 +1,26 @@
 package com.api.invoice.models;
 
 import org.bson.types.Binary;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.annotation.ReadOnlyProperty;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 import javax.persistence.*;
 import javax.validation.Valid;
 import javax.validation.constraints.*;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
-@Entity
+@Document
 public class Invoice {
     @Id
     private String id;
+    @CreatedDate
+    private Date createdDate;
+    @LastModifiedDate
+    private Date lastModifiedDate;
     private String number;
     private String status;
     private List<String> errors;
@@ -41,6 +49,7 @@ public class Invoice {
 
     public Invoice(){
         this.id = UUID.randomUUID().toString();
+        this.createdDate = new Date();
     }
 
     public Invoice(Double discount, String number, List<String> errors, String dueDate, String invoiceDate, Double subtotal, Double VAT, Double total, String currency, Binary image, Vendor vendor, List<Line> lines) {
@@ -57,6 +66,7 @@ public class Invoice {
         this.currency = currency;
         this.vendor = vendor;
         this.lines = lines;
+        this.createdDate = new Date();
     }
 
     public String getId() {
@@ -165,5 +175,17 @@ public class Invoice {
 
     public void setErrors(List<String> errors) {
         this.errors = errors;
+    }
+
+    public Date getCreatedDate() {
+        return createdDate;
+    }
+
+    public Date getLastModifiedDate() {
+        return lastModifiedDate;
+    }
+
+    public void setLastModifiedDate(Date lastModifiedDate) {
+        this.lastModifiedDate = lastModifiedDate;
     }
 }
