@@ -38,7 +38,6 @@ public class Invoice {
     @PositiveOrZero(message = "field must be positive")
     private Double total;
     private String currency;
-    @ReadOnlyProperty
     private Binary image;
     @ManyToOne
     @JoinColumn
