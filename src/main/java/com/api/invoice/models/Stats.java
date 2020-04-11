@@ -1,20 +1,18 @@
 package com.api.invoice.models;
 
-import java.util.List;
-
 public class Stats {
-    private Long totalInvoices;
+    private Integer count;
     private Month currentMonth;
     private Month BeforeCurrentMonth1;
     private Month BeforeCurrentMonth2;
+    private Double totalPrice;
 
-
-    public Long getTotalInvoices() {
-        return totalInvoices;
+    public Integer getCount() {
+        return count;
     }
 
-    public void setTotalInvoices(Long totalInvoices) {
-        this.totalInvoices = totalInvoices;
+    public void setCount(Integer count) {
+        this.count = count;
     }
 
     public Month getCurrentMonth() {
@@ -39,5 +37,13 @@ public class Stats {
 
     public void setBeforeCurrentMonth2(Month beforeCurrentMonth2) {
         BeforeCurrentMonth2 = beforeCurrentMonth2;
+    }
+
+    public Double getTotalPrice() {
+        return totalPrice;
+    }
+
+    public void setTotalPrice(Double totalPrice) {
+        this.totalPrice = totalPrice;
     }
 }

@@ -21,6 +21,9 @@ public class InvoiceController {
     public Page<Invoice> GetInvioces(Pageable pageable){
         return invoiceServiceClass.getInvoices(pageable);
     }
+    @GetMapping(path = "/get/{number}")
+    @CrossOrigin
+    public Invoice GetInvoicesSearch(@PathVariable String number){return invoiceServiceClass.getInvoiceBySearchNumber(number);}
     @GetMapping(path = "/get/{id}")
     @CrossOrigin
     public Invoice GetInvoice(@PathVariable String id){

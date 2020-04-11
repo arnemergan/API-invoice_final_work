@@ -37,10 +37,18 @@ public class InvoiceServiceClass implements InvoiceService {
 
     private final String uri = "https://python-final-work.herokuapp.com/api/v1/ocr?language=";
 
-
     @Override
     public Invoice getInvoice(String id) {
         Invoice invoice = invoiceRepository.getById(id);
+        if(invoice == null){
+            throw new InvoiceNotFoundException("Invoice not found");
+        }
+        return invoice;
+    }
+
+    @Override
+    public Invoice getInvoiceBySearchNumber(String number){
+        Invoice invoice = invoiceRepository.getInvoiceByNumber(number);
         if(invoice == null){
             throw new InvoiceNotFoundException("Invoice not found");
         }
@@ -139,21 +147,32 @@ public class InvoiceServiceClass implements InvoiceService {
         Month current = new Month();
         Month prev = new Month();
         Month prev2 = new Month();
-        Calendar monthprev = new GregorianCalendar();
-        Calendar month = new GregorianCalendar();
-        monthprev.add(Calendar.MONTH, -1);
-        current.setTotal(invoiceRepository.countByCreatedDateBetween(monthprev.getTime(),month.getTime()));
-        monthprev.add(Calendar.MONTH, -1);
-        month.add(Calendar.MONTH, -1);
-        prev.setTotal(invoiceRepository.countByCreatedDateBetween(monthprev.getTime(),month.getTime()));
-        monthprev.add(Calendar.MONTH, -1);
-        month.add(Calendar.MONTH, -1);
-        prev2.setTotal(invoiceRepository.countByCreatedDateBetween(monthprev.getTime(),month.getTime()));
+        current.setTotalPrice(getTotalPrice(invoiceRepository.getAllByCreatedDateBetween(getDate(-1),getDate(0))));
+        current.setTotal(invoiceRepository.countByCreatedDateBetween(getDate(-1),getDate(0)));
+        prev.setTotalPrice(getTotalPrice(invoiceRepository.getAllByCreatedDateBetween(getDate(-2),getDate(-1))));
+        prev.setTotal(invoiceRepository.countByCreatedDateBetween(getDate(-2),getDate(-1)));
+        prev2.setTotalPrice(getTotalPrice(invoiceRepository.getAllByCreatedDateBetween(getDate(-3),getDate(-2))));
+        prev2.setTotal(invoiceRepository.countByCreatedDateBetween(getDate(-3),getDate(-2)));
         stats.setBeforeCurrentMonth1(prev);
         stats.setBeforeCurrentMonth2(prev2);
         stats.setCurrentMonth(current);
-        stats.setTotalInvoices(invoiceRepository.count());
+        stats.setTotalPrice(invoiceRepository.sumTotalPrice());
+        stats.setCount(invoiceRepository.countAllBy() - 1);
         return stats;
+    }
+
+    public double getTotalPrice(List<Invoice> invoiceList){
+        Double total = 0.0;
+        for (Invoice invoice:invoiceList) {
+            total += invoice.getTotal();
+        }
+        return total;
+    }
+
+    public Date getDate(Integer number){
+        Calendar month = new GregorianCalendar();
+        month.add(Calendar.MONTH, number);
+        return month.getTime();
     }
 
     public List<String> validateInvoice(UpdateInvoice invoice){
