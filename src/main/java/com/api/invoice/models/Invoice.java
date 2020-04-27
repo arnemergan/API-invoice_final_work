@@ -34,11 +34,10 @@ public class Invoice {
     @Max(value = 21,message = "field must be between 0 and 21")
     private Double VAT;
     @PositiveOrZero(message = "field must be positive")
-    private Double discount;
-    @PositiveOrZero(message = "field must be positive")
     private Double total;
     private String currency;
     private Binary image;
+    private String userId;
     @ManyToOne
     @JoinColumn
     @Valid
@@ -51,7 +50,7 @@ public class Invoice {
         this.createdDate = new Date();
     }
 
-    public Invoice(Double discount, String number, List<String> errors, String dueDate, String invoiceDate, Double subtotal, Double VAT, Double total, String currency, Binary image, Vendor vendor, List<Line> lines) {
+    public Invoice(String number, List<String> errors, String dueDate, String invoiceDate, Double subtotal, Double VAT, Double total, String currency, Binary image, Vendor vendor, List<Line> lines) {
         this.errors = errors;
         this.image = image;
         this.id = UUID.randomUUID().toString();
@@ -60,7 +59,6 @@ public class Invoice {
         this.invoiceDate = invoiceDate;
         this.subtotal = subtotal;
         this.VAT = VAT;
-        this.discount = discount;
         this.total = total;
         this.currency = currency;
         this.vendor = vendor;
@@ -150,14 +148,6 @@ public class Invoice {
 
     public void setNumber(String number) {
         this.number = number;
-    }
-
-    public Double getDiscount() {
-        return discount;
-    }
-
-    public void setDiscount(Double discount) {
-        this.discount = discount;
     }
 
     public Binary getImage() {

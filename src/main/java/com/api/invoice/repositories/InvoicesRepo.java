@@ -2,12 +2,9 @@ package com.api.invoice.repositories;
 
 import com.api.invoice.models.Invoice;
 import org.bson.types.Binary;
-import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.data.mongodb.repository.Aggregation;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
-
-import java.time.Month;
 import java.util.Date;
 import java.util.List;
 
