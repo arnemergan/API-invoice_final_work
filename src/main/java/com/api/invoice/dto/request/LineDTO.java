@@ -1,10 +1,10 @@
-package com.api.invoice.models;
+package com.api.invoice.dto.request;
 
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.validation.constraints.*;
 
-public class UpdateLine {
+public class LineDTO {
     @NotEmpty(message = "line.description cannot be empty")
     private String description;
     @NotNull(message = "line.unitprice cannot be empty")
@@ -19,10 +19,10 @@ public class UpdateLine {
     @PositiveOrZero(message = "line.amount must be positive")
     private Double amount;
 
-    public UpdateLine(){
+    public LineDTO(){
     }
 
-    public UpdateLine(String description, Double amount, Integer quantity, Integer vat) {
+    public LineDTO(String description, Double amount, Integer quantity, Integer vat) {
         this.description = description;
         this.unitPrice = unitPrice;
         this.quantity = quantity;

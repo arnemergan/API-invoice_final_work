@@ -3,7 +3,6 @@ package com.api.invoice.models;
 import org.bson.types.Binary;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.annotation.ReadOnlyProperty;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import javax.persistence.*;
@@ -11,12 +10,9 @@ import javax.validation.Valid;
 import javax.validation.constraints.*;
 import java.util.Date;
 import java.util.List;
-import java.util.UUID;
 
 @Document
-public class Invoice {
-    @Id
-    private String id;
+public class Invoice extends BaseSaasEntity {
     @CreatedDate
     private Date createdDate;
     @LastModifiedDate
@@ -37,7 +33,9 @@ public class Invoice {
     private Double total;
     private String currency;
     private Binary image;
-    private String userId;
+    @ManyToOne
+    @JoinColumn
+    private User user;
     @ManyToOne
     @JoinColumn
     @Valid
@@ -46,14 +44,12 @@ public class Invoice {
     private List<@Valid Line> lines;
 
     public Invoice(){
-        this.id = UUID.randomUUID().toString();
         this.createdDate = new Date();
     }
 
     public Invoice(String number, List<String> errors, String dueDate, String invoiceDate, Double subtotal, Double VAT, Double total, String currency, Binary image, Vendor vendor, List<Line> lines) {
         this.errors = errors;
         this.image = image;
-        this.id = UUID.randomUUID().toString();
         this.number = number;
         this.dueDate = dueDate;
         this.invoiceDate = invoiceDate;
@@ -64,10 +60,6 @@ public class Invoice {
         this.vendor = vendor;
         this.lines = lines;
         this.createdDate = new Date();
-    }
-
-    public String getId() {
-        return id;
     }
 
     public String getStatus() {
@@ -176,5 +168,13 @@ public class Invoice {
 
     public void setLastModifiedDate(Date lastModifiedDate) {
         this.lastModifiedDate = lastModifiedDate;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 }

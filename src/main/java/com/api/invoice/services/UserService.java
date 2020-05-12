@@ -1,31 +1,19 @@
 package com.api.invoice.services;
-import com.api.invoice.models.User;
-import com.api.invoice.repositories.UserRepo;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
+import com.api.invoice.dto.request.AuthoritiesChangerDTO;
+import com.api.invoice.dto.request.RegisterDTO;
+import com.api.invoice.dto.request.UserInfoChangerDTO;
+import com.api.invoice.dto.response.UserDTO;
+import com.api.invoice.dto.response.UserInfoAdminDTO;
+import com.api.invoice.dto.response.UserInfoDTO;
 
-@Service
-public class UserService implements UserServiceClass, UserDetailsService {
-    @Autowired
-    private UserRepo userRepository;
+import java.util.List;
 
-    public User saveUser(User user) {
-        user.setPassword(new BCryptPasswordEncoder().encode(user.getPassword()));
-        return userRepository.save(user);
-    }
-
-    @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = userRepository.findUserByUsername(username);
-        if (user == null) {
-            throw new UsernameNotFoundException("User not found with username: " + username);
-        }
-        return new org.springframework.security.core.userdetails.User(user.getUsername(), user.getPassword(), new ArrayList<>());
-    }
+public interface UserService {
+    public UserDTO registerUser(RegisterDTO registerDTO,String token);
+    public UserInfoDTO getUserInfo(String token);
+    public UserInfoDTO updateUserInfo(String token, UserInfoChangerDTO userInfoChangerDTO);
+    public List<UserInfoAdminDTO> getUsersTenant(String token);
+    public UserInfoAdminDTO updateUserAuthorities(String token, AuthoritiesChangerDTO authoritiesChangerDTO);
+    public UserInfoAdminDTO disableUser(String token, String username);
 }

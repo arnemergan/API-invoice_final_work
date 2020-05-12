@@ -1,59 +1,119 @@
 package com.api.invoice.models;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
+import java.util.Collection;
+import java.util.Date;
 
 @Document
-public class User{
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
-
+public class User extends BaseSaasEntity implements UserDetails {
+    @Column(name = "username", unique = true, nullable = false)
     private String username;
+
+    @Column(name = "password", nullable = false)
     private String password;
-    private String fullname;
 
-    public User() {
-    }
+    @Column(name = "first_name", nullable = false)
+    private String firstName;
 
-    public User(String username, String password, String fullname) {
-        this.username = username;
-        this.password = password;
-        this.fullname = fullname;
-    }
+    @Column(name = "last_name", nullable = false)
+    private String lastName;
 
+    @Column(name = "email", nullable = false)
+    private String email;
 
-    public int getId() {
-        return id;
-    }
+    @Column(name = "enabled", nullable = false)
+    private boolean enabled;
 
-    public void setId(int id) {
-        this.id = id;
-    }
+    @Column(name = "last_password_reset_date")
+    private Date lastPasswordResetDate;
 
-    public String getUsername() {
-        return username;
-    }
+    @Column(name = "authorities", nullable = false)
+    private Collection<? extends GrantedAuthority> authorities;
 
     public void setUsername(String username) {
         this.username = username;
     }
 
+    public void setPassword(String password) {
+        this.setLastPasswordResetDate(new Date());
+        this.password = password;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
+    public void setAuthorities(Collection<? extends GrantedAuthority> authorities) {
+        this.authorities = authorities;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public Date getLastPasswordResetDate() {
+        return lastPasswordResetDate;
+    }
+
+    public void setLastPasswordResetDate(Date lastPasswordResetDate) {
+        this.lastPasswordResetDate = lastPasswordResetDate;
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return authorities;
+    }
+
+    @Override
     public String getPassword() {
         return password;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
+    @Override
+    public String getUsername() {
+        return username;
     }
 
-    public String getFullname() {
-        return fullname;
+    @Override
+    public boolean isAccountNonExpired() {
+        return enabled;
     }
 
-    public void setFullname(String fullname) {
-        this.fullname = fullname;
+    @Override
+    public boolean isAccountNonLocked() {
+        return enabled;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return enabled;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
     }
 }

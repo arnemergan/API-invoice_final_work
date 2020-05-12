@@ -1,24 +1,29 @@
 package com.api.invoice.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.security.core.GrantedAuthority;
 
-import javax.persistence.Id;
-import java.util.UUID;
+import javax.persistence.*;
 
 @Document
 public class Tenant {
-    @Id
-    private String id;
-    private String name;
-    private String database_name;
-    private boolean active;
 
-    public Tenant(String name, String database_name, boolean active) {
-        this.id = UUID.randomUUID().toString();
-        this.name = name;
-        this.database_name = database_name;
-        this.active = active;
-    }
+    private static final long serialVersionUID = 1L;
+
+    @Id
+    @Column(name = "id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private String id;
+
+    @Column(name = "name", unique = true, nullable = false)
+    private String name;
+
+    @Column(name = "country", unique = true, nullable = false)
+    private String country;
+
+    @Column(name = "maxEmployees", unique = true, nullable = false)
+    private int maxEmployees;
 
     public String getId() {
         return id;
@@ -32,19 +37,19 @@ public class Tenant {
         this.name = name;
     }
 
-    public String getDatabase_name() {
-        return database_name;
+    public String getCountry() {
+        return country;
     }
 
-    public void setDatabase_name(String database_name) {
-        this.database_name = database_name;
+    public void setCountry(String country) {
+        this.country = country;
     }
 
-    public boolean isActive() {
-        return active;
+    public int getMaxEmployees() {
+        return maxEmployees;
     }
 
-    public void setActive(boolean active) {
-        this.active = active;
+    public void setMaxEmployees(int maxEmployees) {
+        this.maxEmployees = maxEmployees;
     }
 }

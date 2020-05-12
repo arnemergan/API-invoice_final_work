@@ -1,10 +1,10 @@
-package com.api.invoice.models;
+package com.api.invoice.dto.request;
 import javax.persistence.*;
 import javax.validation.Valid;
 import javax.validation.constraints.*;
 import java.util.List;
 
-public class UpdateInvoice {
+public class InvoiceDTO {
     @NotEmpty(message = "number cannot be empty")
     private String number;
     @NotEmpty(message = "duedate cannot be empty")
@@ -32,11 +32,11 @@ public class UpdateInvoice {
     @ManyToOne
     @JoinColumn
     @Valid
-    private UpdateVendor vendor;
+    private VendorDTO vendor;
     @OneToMany(mappedBy = "invoice", cascade = CascadeType.ALL)
-    private List<@Valid UpdateLine> lines;
+    private List<@Valid LineDTO> lines;
 
-    public UpdateInvoice(Double discount, String number, String dueDate, String invoiceDate, Double subtotal, Double VAT, Double total, String currency, UpdateVendor vendor, List<UpdateLine> lines) {
+    public InvoiceDTO(Double discount, String number, String dueDate, String invoiceDate, Double subtotal, Double VAT, Double total, String currency, VendorDTO vendor, List<LineDTO> lines) {
         this.number = number;
         this.dueDate = dueDate;
         this.invoiceDate = invoiceDate;
@@ -49,7 +49,7 @@ public class UpdateInvoice {
         this.lines = lines;
     }
 
-    public UpdateInvoice(){
+    public InvoiceDTO(){
 
     }
 
@@ -101,19 +101,19 @@ public class UpdateInvoice {
         this.currency = currency;
     }
 
-    public UpdateVendor getVendor() {
+    public VendorDTO getVendor() {
         return vendor;
     }
 
-    public void setVendor(UpdateVendor vendor) {
+    public void setVendor(VendorDTO vendor) {
         this.vendor = vendor;
     }
 
-    public List<UpdateLine> getLines() {
+    public List<LineDTO> getLines() {
         return lines;
     }
 
-    public void setLines(List<UpdateLine> products) {
+    public void setLines(List<LineDTO> products) {
         this.lines = products;
     }
 

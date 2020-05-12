@@ -1,10 +1,10 @@
-package com.api.invoice.models;
+package com.api.invoice.dto.request;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Pattern;
 import java.util.UUID;
 
-public class UpdateVendor {
+public class VendorDTO {
     @NotEmpty(message = "vendor.name cannot be empty")
     private String name;
     @NotEmpty(message = "vendor.address cannot be empty")
@@ -19,9 +19,9 @@ public class UpdateVendor {
     @Pattern(regexp = "[A-Za-z]{2}[0-9|\\s]{8,15}$",message = "vendor.vatNumber must be a valid VATNumber")
     private String vatNumber;
 
-    public UpdateVendor(){};
+    public VendorDTO(){};
 
-    public UpdateVendor(String name, String address, String phone, String email, String vatNumber) {
+    public VendorDTO(String name, String address, String phone, String email, String vatNumber) {
         this.name = name;
         this.address = address;
         this.phone = phone;
