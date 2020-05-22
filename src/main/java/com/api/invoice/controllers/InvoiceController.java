@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.util.Collection;
 
 @RestController
+@CrossOrigin(origins = "*", allowedHeaders = "*")
 @RequestMapping(path = "invoices")
 public class InvoiceController {
 
@@ -20,22 +21,18 @@ public class InvoiceController {
     private InvoiceServiceImpl invoiceServiceClass;
 
     @GetMapping(path = {"/",""})
-    @CrossOrigin
     public Page<Invoice> GetInvioces(Pageable pageable,HttpServletRequest request){
         return invoiceServiceClass.getInvoices(pageable,request.getHeader("Authorization").split(" ")[1]);
     }
     @GetMapping(path = "/search/{number}")
-    @CrossOrigin
     public Invoice GetInvoicesSearch(@PathVariable String number,HttpServletRequest request){
         return invoiceServiceClass.getInvoiceBySearchNumber(number,request.getHeader("Authorization").split(" ")[1]);
     }
     @GetMapping(path = "/get/{id}")
-    @CrossOrigin
     public Invoice GetInvoice(@PathVariable String id,HttpServletRequest request){
         return invoiceServiceClass.getInvoice(id,request.getHeader("Authorization").split(" ")[1]);
     }
     @PostMapping(path = "/upload")
-    @CrossOrigin
     public Invoice CreateInvoice(@ModelAttribute("image") MultipartFile  image, @ModelAttribute("lang") String language, HttpServletRequest request) throws IOException {
         return invoiceServiceClass.uploadInvoice(image,language,request.getHeader("Authorization").split(" ")[1]);
     }
@@ -45,7 +42,6 @@ public class InvoiceController {
         return invoiceServiceClass.updateInvoice(id,invoice,request.getHeader("Authorization").split(" ")[1]);
     }
     @DeleteMapping(path = "/delete/{id}")
-    @CrossOrigin
     public void DeleteInvoice(@PathVariable String id,HttpServletRequest request){
         invoiceServiceClass.deleteInvoice(id,request.getHeader("Authorization").split(" ")[1]);
     }

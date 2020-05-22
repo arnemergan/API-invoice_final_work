@@ -11,13 +11,13 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.servlet.http.HttpServletRequest;
 
 @RestController
+@CrossOrigin(origins = "*", allowedHeaders = "*")
 @RequestMapping(path = "statistics")
 public class StatsController {
     @Autowired
     private InvoiceServiceImpl invoiceServiceClass;
 
     @GetMapping(path = {"/",""})
-    @CrossOrigin
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public Stats GetStats(HttpServletRequest request){
         return invoiceServiceClass.getStats(request.getHeader("Authorization").split(" ")[1]);

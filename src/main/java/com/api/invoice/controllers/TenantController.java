@@ -15,7 +15,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
 @RestController
-@CrossOrigin
+@CrossOrigin(origins = "*", allowedHeaders = "*")
 @RequestMapping("tenant")
 public class TenantController {
     @Autowired
@@ -32,7 +32,7 @@ public class TenantController {
 
     @PostMapping("/update")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<TenantDTO> update(HttpServletRequest request,@RequestBody @Valid RegisterTenantDTO registerTenantDTO) {
+    public ResponseEntity<TenantDTO> update(HttpServletRequest request,@RequestBody @Valid TenantDTO registerTenantDTO) {
         return new ResponseEntity<>(tenantService.updateTenant(registerTenantDTO,request.getHeader("Authorization").split(" ")[1]), HttpStatus.OK);
     }
 

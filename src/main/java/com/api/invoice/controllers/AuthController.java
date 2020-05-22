@@ -19,7 +19,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
 @RestController
-@CrossOrigin
+@CrossOrigin(origins = "*", allowedHeaders = "*")
 @RequestMapping("authenticate")
 public class AuthController {
 
@@ -40,7 +40,7 @@ public class AuthController {
         return new ResponseEntity<>(userService.registerUser(registerDTO,request.getHeader("Authorization").split(" ")[1]), HttpStatus.OK);
     }
 
-    @PostMapping("/refresh")
+    @GetMapping("/refresh")
     public ResponseEntity<UserTokenDTO> refreshAuthenticationToken(HttpServletRequest request) {
         return new ResponseEntity<>(userDetailsService.refreshAuthenticationToken(request), HttpStatus.OK);
     }

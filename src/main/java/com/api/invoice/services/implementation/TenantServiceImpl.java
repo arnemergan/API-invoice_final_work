@@ -26,9 +26,6 @@ public class TenantServiceImpl implements TenantService {
     private UserRepo userRepo;
 
     @Autowired
-    private MongoTemplate mongoTemplate;
-
-    @Autowired
     private TokenUtils tokenUtils;
 
     @Override
@@ -46,15 +43,14 @@ public class TenantServiceImpl implements TenantService {
         authorities.add("ROLE_ADMIN");
         adminUser.setAuthorities(tokenUtils.getAuthorities(authorities));
         userRepo.save(adminUser);
-        mongoTemplate.createCollection("invoices" + tenant.getId());
         return mapTenantDTO(registerTenantDTO);
     }
 
     @Override
-    public TenantDTO updateTenant(RegisterTenantDTO registerTenantDTO, String token) {
+    public TenantDTO updateTenant(TenantDTO registerTenantDTO, String token) {
         Tenant tenant = tenantRepo.findById(tokenUtils.getTenantFromToken(token)).orElseThrow(() -> new ResourceNotFoundException("Tenant not found!"));
-        tenantRepo.save(mapTenant(registerTenantDTO,tenant));
-        return mapTenantDTO(registerTenantDTO);
+        tenantRepo.save(mapTenant(tenant,registerTenantDTO));
+        return registerTenantDTO;
     }
 
     @Override
@@ -75,6 +71,15 @@ public class TenantServiceImpl implements TenantService {
         tenantDTO.setCountry(tenant.getCountry());
         tenantDTO.setMaxEmployees(tenant.getMaxEmployees());
         return tenantDTO;
+    }
+    private Tenant mapTenant(Tenant tenant,TenantDTO registerTenantDTO){
+        if(tenant == null){
+            tenant = new Tenant();
+        }
+        tenant.setName(registerTenantDTO.getName());
+        tenant.setCountry(registerTenantDTO.getCountry());
+        tenant.setMaxEmployees(registerTenantDTO.getMaxEmployees());
+        return tenant;
     }
 
     private Tenant mapTenant(RegisterTenantDTO registerTenantDTO, Tenant tenant){

@@ -13,27 +13,25 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 @RestController
+@CrossOrigin(origins = "*", allowedHeaders = "*")
 @RequestMapping("user")
 public class UserController {
     @Autowired
     private UserServiceImpl userService;
 
     @GetMapping(path = "/")
-    @CrossOrigin
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public List<UserInfoAdminDTO> getUsers(HttpServletRequest request){
         return userService.getUsersTenant(request.getHeader("Authorization").split(" ")[1]);
     }
 
-    @DeleteMapping(path = "/")
-    @CrossOrigin
+    @DeleteMapping(path = "/{username}")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<UserInfoAdminDTO> Delete(HttpServletRequest request,@RequestParam String username){
+    public ResponseEntity<UserInfoAdminDTO> Delete(HttpServletRequest request,@PathVariable String username){
         return new ResponseEntity<>(userService.disableUser(request.getHeader("Authorization").split(" ")[1],username),HttpStatus.OK);
     }
 
     @PutMapping(path = "/")
-    @CrossOrigin
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<UserInfoAdminDTO> Update(HttpServletRequest request,@RequestBody AuthoritiesChangerDTO authoritiesChangerDTO){
         return new ResponseEntity<>(userService.updateUserAuthorities(request.getHeader("Authorization").split(" ")[1],authoritiesChangerDTO), HttpStatus.OK);

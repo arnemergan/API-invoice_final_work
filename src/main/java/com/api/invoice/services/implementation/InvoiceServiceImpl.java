@@ -79,12 +79,12 @@ public class InvoiceServiceImpl implements InvoiceService {
             throw new ImageException("Image must be included");
         }
         try {
-            Invoice invoice;
+            Invoice invoice = null;
             Binary bin = new Binary(BsonBinarySubType.BINARY, image.getBytes());
-            invoice = invoiceRepository.getByImage(bin);
+            //invoice = invoiceRepository.getByImageAndTenantId(bin, tokenUtils.getTenantFromToken(token));
             if(invoice != null) {
                 return invoice;
-            }else{
+            } else {
                 invoice = new Invoice();
                 HttpHeaders headers = new HttpHeaders();
                 headers.setContentType(MediaType.MULTIPART_FORM_DATA);
@@ -122,6 +122,58 @@ public class InvoiceServiceImpl implements InvoiceService {
                 return invoiceRepository.save(invoice);
             }
         }catch (IOException e){
+            throw new ImageException("Something went wrong with the image");
+        }
+    }
+
+    @Override
+    public Invoice uploadInvoiceOnTenant(File image, String lang, String tenantid) throws Exception {
+        if(image == null){
+            throw new ImageException("Image must be included");
+        }
+        try {
+            Invoice invoice;
+            Binary bin = new Binary(BsonBinarySubType.BINARY, image.toString().getBytes());
+            invoice = invoiceRepository.getByImageAndTenantId(bin, tenantid);
+            if(invoice != null) {
+                return invoice;
+            }else{
+                invoice = new Invoice();
+                HttpHeaders headers = new HttpHeaders();
+                headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+                MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+                body.add("image", new FileSystemResource(image));
+                HttpEntity<MultiValueMap<String, Object>> entity = new HttpEntity<>(body, headers);
+                ResponseEntity response = new RestTemplate().postForEntity(uri + lang, entity, String.class);
+                if (response.getStatusCode() == HttpStatus.OK) {
+                    ObjectMapper objectMapper = new ObjectMapper();
+                    try {
+                        invoice = objectMapper.readValue(response.getBody().toString(), Invoice.class);
+                    }catch (JsonProcessingException ex){
+                        throw new ImageException("Error during processing json");
+                    }
+                    if(invoice.getVendor() == null){
+                        invoice.setVendor(new Vendor());
+                    }
+                    if(invoice.getLines() == null){
+                        invoice.setLines(new ArrayList<>());
+                    }
+                }else if(response.getStatusCode() == HttpStatus.BAD_REQUEST || response.getStatusCode() == HttpStatus.INTERNAL_SERVER_ERROR){
+                    throw new ImageException("Error during processing image");
+                }else{
+                    invoice.setLines(new ArrayList<>());
+                    invoice.setVendor(new Vendor());
+                }
+                if(invoice.getErrors().size() > 0 || invoice.getErrors() == null){
+                    invoice.setStatus("work");
+                }else{
+                    invoice.setStatus("done");
+                }
+                invoice.setTenantId(tenantid);
+                invoice.setImage(bin);
+                return invoiceRepository.save(invoice);
+            }
+        }catch (Exception e){
             throw new ImageException("Something went wrong with the image");
         }
     }

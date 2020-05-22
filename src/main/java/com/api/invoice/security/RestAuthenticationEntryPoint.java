@@ -12,7 +12,6 @@ import java.io.IOException;
 @Component
 public class RestAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
-    /* This method is activated when unauthorized user tries to access secured REST service */
     @Override
     public void commence(HttpServletRequest request,
                          HttpServletResponse response,

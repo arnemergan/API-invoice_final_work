@@ -14,7 +14,7 @@ import java.util.List;
 public interface InvoicesRepo extends MongoRepository<Invoice, String> {
     public Page<Invoice> findAllByTenantId(String tenant, Pageable pageable);
     public Invoice getByIdAndTenantId(String id,String tenant);
-    public Invoice getByImage(Binary binary);
+    public Invoice getByImageAndTenantId(Binary binary, String tenant);
     public Integer countAllByTenantId(String tenant);
     public Integer countByCreatedDateBetweenAndTenantId(Date date1,Date date2,String tenant);
     public List<Invoice> getAllByCreatedDateBetweenAndTenantId(Date date1,Date date2,String tenant);

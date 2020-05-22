@@ -19,10 +19,10 @@ public class Tenant {
     @Column(name = "name", unique = true, nullable = false)
     private String name;
 
-    @Column(name = "country", unique = true, nullable = false)
+    @Column(name = "country", nullable = false)
     private String country;
 
-    @Column(name = "maxEmployees", unique = true, nullable = false)
+    @Column(name = "maxEmployees", nullable = false)
     private int maxEmployees;
 
     public String getId() {
