@@ -16,4 +16,5 @@ public interface UserService {
     public List<UserInfoAdminDTO> getUsersTenant(String token);
     public UserInfoAdminDTO updateUserAuthorities(String token, AuthoritiesChangerDTO authoritiesChangerDTO);
     public UserInfoAdminDTO disableUser(String token, String username);
+    public boolean disableUsersTenant(String token);
 }

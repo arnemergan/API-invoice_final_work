@@ -3,7 +3,6 @@ package com.api.invoice.services.implementation;
 import com.api.invoice.dto.request.RegisterTenantDTO;
 import com.api.invoice.dto.response.TenantDTO;
 import com.api.invoice.exceptions.ResourceNotFoundException;
-import com.api.invoice.models.Invoice;
 import com.api.invoice.models.Tenant;
 import com.api.invoice.models.User;
 import com.api.invoice.repositories.TenantRepo;
@@ -11,7 +10,6 @@ import com.api.invoice.repositories.UserRepo;
 import com.api.invoice.security.TokenUtils;
 import com.api.invoice.services.TenantService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -70,15 +68,19 @@ public class TenantServiceImpl implements TenantService {
         tenantDTO.setName(tenant.getName());
         tenantDTO.setCountry(tenant.getCountry());
         tenantDTO.setMaxEmployees(tenant.getMaxEmployees());
+        tenantDTO.setSubscriptionId(tenant.getSubscriptionId());
+        tenantDTO.setCustomerId(tenant.getCustomerId());
         return tenantDTO;
     }
-    private Tenant mapTenant(Tenant tenant,TenantDTO registerTenantDTO){
+    private Tenant mapTenant(Tenant tenant,TenantDTO tenantDTO){
         if(tenant == null){
             tenant = new Tenant();
         }
-        tenant.setName(registerTenantDTO.getName());
-        tenant.setCountry(registerTenantDTO.getCountry());
-        tenant.setMaxEmployees(registerTenantDTO.getMaxEmployees());
+        tenant.setName(tenantDTO.getName());
+        tenant.setCountry(tenantDTO.getCountry());
+        tenant.setMaxEmployees(tenantDTO.getMaxEmployees());
+        tenant.setSubscriptionId(tenantDTO.getSubscriptionId());
+        tenant.setCustomerId(tenantDTO.getCustomerId());
         return tenant;
     }
 
@@ -89,6 +91,8 @@ public class TenantServiceImpl implements TenantService {
         tenant.setName(registerTenantDTO.getName());
         tenant.setCountry(registerTenantDTO.getCountry());
         tenant.setMaxEmployees(registerTenantDTO.getMaxEmployees());
+        tenant.setCustomerId(registerTenantDTO.getCustomerId());
+        tenant.setSubscriptionId(registerTenantDTO.getSubscriptionId());
         return tenant;
     }
 
@@ -97,6 +101,8 @@ public class TenantServiceImpl implements TenantService {
         tenantDTO.setName(registerTenantDTO.getName());
         tenantDTO.setCountry(registerTenantDTO.getCountry());
         tenantDTO.setMaxEmployees(registerTenantDTO.getMaxEmployees());
+        tenantDTO.setCustomerId(registerTenantDTO.getCustomerId());
+        tenantDTO.setSubscriptionId(registerTenantDTO.getSubscriptionId());
         return tenantDTO;
     }
 }

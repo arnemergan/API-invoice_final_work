@@ -25,6 +25,12 @@ public class Tenant {
     @Column(name = "maxEmployees", nullable = false)
     private int maxEmployees;
 
+    @Column(name = "subscriptionId", nullable = false)
+    private String subscriptionId;
+
+    @Column(name = "customerId", nullable = false)
+    private String customerId;
+
     public String getId() {
         return id;
     }
@@ -51,5 +57,21 @@ public class Tenant {
 
     public void setMaxEmployees(int maxEmployees) {
         this.maxEmployees = maxEmployees;
+    }
+
+    public String getSubscriptionId() {
+        return subscriptionId;
+    }
+
+    public void setSubscriptionId(String subscriptionId) {
+        this.subscriptionId = subscriptionId;
+    }
+
+    public String getCustomerId() {
+        return customerId;
+    }
+
+    public void setCustomerId(String customerId) {
+        this.customerId = customerId;
     }
 }

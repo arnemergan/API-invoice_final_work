@@ -7,6 +7,7 @@ import com.api.invoice.dto.response.UserDTO;
 import com.api.invoice.dto.response.UserInfoAdminDTO;
 import com.api.invoice.dto.response.UserInfoDTO;
 import com.api.invoice.exceptions.ApiRequestException;
+import com.api.invoice.exceptions.ResourceNotFoundException;
 import com.api.invoice.exceptions.UserNameFoundException;
 import com.api.invoice.models.User;
 import com.api.invoice.repositories.TenantRepo;
@@ -122,6 +123,20 @@ public class UserServiceImpl implements UserService {
         user.setEnabled(false);
         userRepository.save(user);
         return mapUser(user);
+    }
+
+    @Override
+    public boolean disableUsersTenant(String token) {
+        String tenantId = tokenUtils.getTenantFromToken(token);
+        if(tenantId == null){
+            throw new ResourceNotFoundException("Tenant id not found");
+        }
+        List<User> users = userRepository.findAllByTenantId(tokenUtils.getTenantFromToken(token));
+        for(User user: users){
+            user.setEnabled(false);
+            userRepository.save(user);
+        }
+        return true;
     }
 
     private UserInfoAdminDTO mapUser(User user){

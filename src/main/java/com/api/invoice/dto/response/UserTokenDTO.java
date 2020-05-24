@@ -3,6 +3,7 @@ package com.api.invoice.dto.response;
 public class UserTokenDTO {
 
     private String accessToken;
+    private String refreshToken;
     private Long expiresIn;
 
     public UserTokenDTO() {
@@ -10,9 +11,10 @@ public class UserTokenDTO {
         this.expiresIn = null;
     }
 
-    public UserTokenDTO(String accessToken, long expiresIn) {
+    public UserTokenDTO(String accessToken, long expiresIn, String refreshToken) {
         this.accessToken = accessToken;
         this.expiresIn = expiresIn;
+        this.refreshToken = refreshToken;
     }
 
     public String getAccessToken() {
@@ -29,5 +31,13 @@ public class UserTokenDTO {
 
     public void setExpiresIn(Long expiresIn) {
         this.expiresIn = expiresIn;
+    }
+
+    public String getRefreshToken() {
+        return refreshToken;
+    }
+
+    public void setRefreshToken(String refreshToken) {
+        this.refreshToken = refreshToken;
     }
 }

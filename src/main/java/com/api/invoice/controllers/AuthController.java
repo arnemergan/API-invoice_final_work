@@ -40,9 +40,9 @@ public class AuthController {
         return new ResponseEntity<>(userService.registerUser(registerDTO,request.getHeader("Authorization").split(" ")[1]), HttpStatus.OK);
     }
 
-    @GetMapping("/refresh")
-    public ResponseEntity<UserTokenDTO> refreshAuthenticationToken(HttpServletRequest request) {
-        return new ResponseEntity<>(userDetailsService.refreshAuthenticationToken(request), HttpStatus.OK);
+    @GetMapping("/refresh/{token}")
+    public ResponseEntity<UserTokenDTO> refreshAuthenticationToken(HttpServletRequest request, @PathVariable String token) {
+        return new ResponseEntity<>(userDetailsService.refreshAuthenticationToken(request, token), HttpStatus.OK);
     }
 
     @PostMapping("/change-password")

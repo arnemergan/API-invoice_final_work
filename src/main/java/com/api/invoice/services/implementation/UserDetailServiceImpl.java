@@ -82,20 +82,18 @@ public class UserDetailServiceImpl implements UserDetailsService {
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String jwt = tokenUtils.generateToken(user.getUsername(),user.getTenantId());
         int expiresIn = tokenUtils.getExpiredIn();
+        String refresh = tokenUtils.generateRefreshToken(user.getUsername(),user.getTenantId());
         UserDTO userDto = new UserDTO(user);
-        userDto.setToken(new UserTokenDTO(jwt, expiresIn));
+        userDto.setToken(new UserTokenDTO(jwt, expiresIn,refresh));
         return userDto;
     }
 
-    public UserTokenDTO refreshAuthenticationToken(HttpServletRequest request) throws ApiRequestException {
-        String token = tokenUtils.getToken(request);
-        String username = tokenUtils.getUsernameFromToken(token);
-        User user = (User) loadUserByUsername(username);
-
-        if (tokenUtils.canTokenBeRefreshed(token, user.getLastPasswordResetDate())) {
-            String refreshedToken = tokenUtils.refreshToken(token);
-            int expiresIn = tokenUtils.getExpiredIn();
-            return new UserTokenDTO(refreshedToken, expiresIn);
+    public UserTokenDTO refreshAuthenticationToken(HttpServletRequest request, String refreshtoken) throws ApiRequestException {
+        if (tokenUtils.canTokenBeRefreshed(refreshtoken, tokenUtils.getToken(request))) {
+            UserTokenDTO userTokenDTO = new UserTokenDTO();
+            userTokenDTO.setAccessToken(tokenUtils.refreshToken(tokenUtils.getToken(request)));
+            userTokenDTO.setExpiresIn((long) tokenUtils.getExpiredIn());
+            return userTokenDTO;
         } else {
             throw new ApiRequestException("Token can not be refreshed.");
         }

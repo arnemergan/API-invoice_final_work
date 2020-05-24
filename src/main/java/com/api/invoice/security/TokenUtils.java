@@ -28,6 +28,9 @@ public class TokenUtils {
     @Value("900 000")
     private int EXPIRES_IN;
 
+    @Value("43 200 000")
+    private int EXPIRES_IN_REFRESH;
+
     @Value("Authorization")
     private String AUTH_HEADER;
 
@@ -46,8 +49,23 @@ public class TokenUtils {
                 .signWith(SIGNATURE_ALGORITHM, SECRET).compact();
     }
 
+    public String generateRefreshToken(String username, String id) {
+        return Jwts.builder()
+                .setIssuer(APP_NAME)
+                .setSubject(username)
+                .claim("tenant",id)
+                .setAudience(AUDIENCE_WEB)
+                .setIssuedAt(new Date())
+                .setExpiration(generateExpirationDateRefresh())
+                .signWith(SIGNATURE_ALGORITHM, SECRET).compact();
+    }
+
     private Date generateExpirationDate() {
         return new Date(new Date().getTime() + EXPIRES_IN);
+    }
+
+    private Date generateExpirationDateRefresh() {
+        return new Date(new Date().getTime() + EXPIRES_IN_REFRESH);
     }
 
     public String refreshToken(String token) {
@@ -65,10 +83,8 @@ public class TokenUtils {
         return refreshedToken;
     }
 
-    public Boolean canTokenBeRefreshed(String token, Date lastPasswordReset) {
-        final Date created = this.getIssuedAtDateFromToken(token);
-        return (this.isCreatedBeforeLastPasswordReset(created, lastPasswordReset)
-                && (!(this.isTokenExpired(token))));
+    public Boolean canTokenBeRefreshed(String refreshToken, String token) {
+        return !this.isTokenExpired(refreshToken) && this.isTokenExpired(token);
     }
 
     public Boolean validateToken(String token, UserDetails userDetails) {

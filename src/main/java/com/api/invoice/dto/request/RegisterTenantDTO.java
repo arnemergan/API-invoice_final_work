@@ -3,7 +3,6 @@ import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.Range;
 
 import javax.validation.constraints.Email;
-import javax.validation.constraints.Min;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
@@ -36,6 +35,13 @@ public class RegisterTenantDTO {
     @NotEmpty(message = "password is required")
     @NotNull(message = "password is required")
     private String password;
+    @NotEmpty(message = "stripeToken is required")
+    private String stripeToken;
+    @NotEmpty(message = "plan is required")
+    private String plan;
+    private String subscriptionId;
+    private String customerId;
+
 
     public String getUsername() {
         return username;
@@ -99,5 +105,37 @@ public class RegisterTenantDTO {
 
     public void setMaxEmployees(int maxEmployees) {
         this.maxEmployees = maxEmployees;
+    }
+
+    public String getStripeToken() {
+        return stripeToken;
+    }
+
+    public void setStripeToken(String stripeToken) {
+        this.stripeToken = stripeToken;
+    }
+
+    public String getPlan() {
+        return plan;
+    }
+
+    public void setPlan(String plan) {
+        this.plan = plan;
+    }
+
+    public String getCustomerId() {
+        return customerId;
+    }
+
+    public void setCustomerId(String customerId) {
+        this.customerId = customerId;
+    }
+
+    public String getSubscriptionId() {
+        return subscriptionId;
+    }
+
+    public void setSubscriptionId(String subscriptionId) {
+        this.subscriptionId = subscriptionId;
     }
 }

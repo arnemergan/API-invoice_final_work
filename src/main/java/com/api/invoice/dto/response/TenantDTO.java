@@ -3,6 +3,8 @@ package com.api.invoice.dto.response;
 public class TenantDTO {
     private String name;
     private String country;
+    private String customerId;
+    private String subscriptionId;
     private int maxEmployees;
 
     public String getName() {
@@ -27,5 +29,21 @@ public class TenantDTO {
 
     public void setMaxEmployees(int maxEmployees) {
         this.maxEmployees = maxEmployees;
+    }
+
+    public String getCustomerId() {
+        return customerId;
+    }
+
+    public void setCustomerId(String customerId) {
+        this.customerId = customerId;
+    }
+
+    public String getSubscriptionId() {
+        return subscriptionId;
+    }
+
+    public void setSubscriptionId(String subscriptionId) {
+        this.subscriptionId = subscriptionId;
     }
 }
