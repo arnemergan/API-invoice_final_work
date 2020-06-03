@@ -1,9 +1,13 @@
 package com.api.invoice.services.implementation;
+import com.api.invoice.dto.external.FloatValue;
+import com.api.invoice.dto.external.LineDTO;
+import com.api.invoice.dto.external.StringValue;
 import com.api.invoice.dto.request.InvoiceDTO;
+import com.api.invoice.dto.response.Month;
+import com.api.invoice.dto.response.Stats;
 import com.api.invoice.exceptions.ApiRequestException;
 import com.api.invoice.exceptions.ImageException;
 import com.api.invoice.exceptions.InvoiceNotFoundException;
-import com.api.invoice.exceptions.InvoiceUpdateException;
 import com.api.invoice.models.*;
 import com.api.invoice.repositories.InvoicesRepo;
 import com.api.invoice.repositories.UserRepo;
@@ -11,11 +15,10 @@ import com.api.invoice.security.TokenUtils;
 import com.api.invoice.services.InvoiceService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.bson.BsonBinarySubType;
-import org.bson.types.Binary;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -23,12 +26,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
-
 import org.springframework.data.domain.Pageable;
-
-import javax.validation.ConstraintViolation;
-import javax.validation.Validation;
-import javax.validation.Validator;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -36,15 +34,18 @@ import java.util.*;
 
 @Service
 public class InvoiceServiceImpl implements InvoiceService {
-
     @Autowired
     private InvoicesRepo invoiceRepository;
     @Autowired
     private UserRepo userRepo;
     @Autowired
     private TokenUtils tokenUtils;
+    @Autowired
+    private FileStorageServiceImpl fileStorageService;
+    @Autowired
+    private CategoryServiceImpl categoryService;
 
-    private final String uri = "https://python-final-work.herokuapp.com/api/v1/ocr?language=";
+    private final String uri = "https://final-work-python.herokuapp.com/api/v1/ocr?language=";
 
     @Override
     public Invoice getInvoice(String id, String token) {
@@ -65,6 +66,25 @@ public class InvoiceServiceImpl implements InvoiceService {
     }
 
     @Override
+    public Resource getImage(String token, String filename) {
+        Invoice invoice = invoiceRepository.getInvoiceByFilenameAndTenantId(filename,tokenUtils.getTenantFromToken(token));
+        if(invoice == null){
+            throw new InvoiceNotFoundException("Image not found");
+        }
+        return fileStorageService.load(filename);
+    }
+
+    @Override
+    public Page<Invoice> getInvoicesOnCategory(Pageable pageable, String token, String name) {
+        return invoiceRepository.findAllByTenantIdAndCategory(tokenUtils.getTenantFromToken(token),categoryService.getByName(token,name),pageable);
+    }
+
+    @Override
+    public Page<Invoice> getInvoicesOnUsername(Pageable pageable, String token, String username) {
+        return invoiceRepository.findAllByTenantIdAndUsername(tokenUtils.getTenantFromToken(token),username,pageable);
+    }
+
+    @Override
     public Page<Invoice> getInvoices(Pageable pageable, String token) {
         return invoiceRepository.findAllByTenantId(tokenUtils.getTenantFromToken(token),pageable);
     }
@@ -79,100 +99,38 @@ public class InvoiceServiceImpl implements InvoiceService {
             throw new ImageException("Image must be included");
         }
         try {
-            Invoice invoice = null;
-            Binary bin = new Binary(BsonBinarySubType.BINARY, image.getBytes());
-            //invoice = invoiceRepository.getByImageAndTenantId(bin, tokenUtils.getTenantFromToken(token));
-            if(invoice != null) {
-                return invoice;
-            } else {
-                invoice = new Invoice();
-                HttpHeaders headers = new HttpHeaders();
-                headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-                MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-                body.add("image", new FileSystemResource(convert(image)));
-                HttpEntity<MultiValueMap<String, Object>> entity = new HttpEntity<>(body, headers);
-                ResponseEntity response = new RestTemplate().postForEntity(uri + lang, entity, String.class);
-                if (response.getStatusCode() == HttpStatus.OK) {
-                    ObjectMapper objectMapper = new ObjectMapper();
-                    try {
-                        invoice = objectMapper.readValue(response.getBody().toString(), Invoice.class);
-                    }catch (JsonProcessingException ex){
-                        throw new ImageException("Error during processing json");
-                    }
-                    if(invoice.getVendor() == null){
-                        invoice.setVendor(new Vendor());
-                    }
-                    if(invoice.getLines() == null){
-                        invoice.setLines(new ArrayList<>());
-                    }
-                }else if(response.getStatusCode() == HttpStatus.BAD_REQUEST || response.getStatusCode() == HttpStatus.INTERNAL_SERVER_ERROR){
-                    throw new ImageException("Error during processing image");
-                }else{
-                    invoice.setLines(new ArrayList<>());
+            Invoice invoice = new Invoice();
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+            MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+            body.add("image", new FileSystemResource(convert(image)));
+            HttpEntity<MultiValueMap<String, Object>> entity = new HttpEntity<>(body, headers);
+            ResponseEntity response = new RestTemplate().postForEntity(uri + lang, entity, String.class);
+            if (response.getStatusCode() == HttpStatus.OK) {
+                ObjectMapper objectMapper = new ObjectMapper();
+                try {
+                    invoice = mapInvoiceDTO(objectMapper.readValue(response.getBody().toString(), com.api.invoice.dto.external.InvoiceDTO.class));
+                }catch (JsonProcessingException ex){
+                    throw new ImageException(ex.toString());
+                }
+                if(invoice.getVendor() == null){
                     invoice.setVendor(new Vendor());
                 }
-                if(invoice.getErrors().size() > 0 || invoice.getErrors() == null){
-                    invoice.setStatus("work");
-                }else{
-                    invoice.setStatus("done");
+                if(invoice.getLines() == null){
+                    invoice.setLines(new ArrayList<>());
                 }
-                invoice.setUser(user);
-                invoice.setTenantId(user.getTenantId());
-                invoice.setImage(bin);
-                return invoiceRepository.save(invoice);
-            }
-        }catch (IOException e){
-            throw new ImageException("Something went wrong with the image");
-        }
-    }
-
-    @Override
-    public Invoice uploadInvoiceOnTenant(File image, String lang, String tenantid) throws Exception {
-        if(image == null){
-            throw new ImageException("Image must be included");
-        }
-        try {
-            Invoice invoice;
-            Binary bin = new Binary(BsonBinarySubType.BINARY, image.toString().getBytes());
-            invoice = invoiceRepository.getByImageAndTenantId(bin, tenantid);
-            if(invoice != null) {
-                return invoice;
+            }else if(response.getStatusCode() == HttpStatus.BAD_REQUEST || response.getStatusCode() == HttpStatus.INTERNAL_SERVER_ERROR){
+                throw new ImageException("Error during processing image");
             }else{
-                invoice = new Invoice();
-                HttpHeaders headers = new HttpHeaders();
-                headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-                MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-                body.add("image", new FileSystemResource(image));
-                HttpEntity<MultiValueMap<String, Object>> entity = new HttpEntity<>(body, headers);
-                ResponseEntity response = new RestTemplate().postForEntity(uri + lang, entity, String.class);
-                if (response.getStatusCode() == HttpStatus.OK) {
-                    ObjectMapper objectMapper = new ObjectMapper();
-                    try {
-                        invoice = objectMapper.readValue(response.getBody().toString(), Invoice.class);
-                    }catch (JsonProcessingException ex){
-                        throw new ImageException("Error during processing json");
-                    }
-                    if(invoice.getVendor() == null){
-                        invoice.setVendor(new Vendor());
-                    }
-                    if(invoice.getLines() == null){
-                        invoice.setLines(new ArrayList<>());
-                    }
-                }else if(response.getStatusCode() == HttpStatus.BAD_REQUEST || response.getStatusCode() == HttpStatus.INTERNAL_SERVER_ERROR){
-                    throw new ImageException("Error during processing image");
-                }else{
-                    invoice.setLines(new ArrayList<>());
-                    invoice.setVendor(new Vendor());
-                }
-                if(invoice.getErrors().size() > 0 || invoice.getErrors() == null){
-                    invoice.setStatus("work");
-                }else{
-                    invoice.setStatus("done");
-                }
-                invoice.setTenantId(tenantid);
-                invoice.setImage(bin);
-                return invoiceRepository.save(invoice);
+                invoice.setLines(new ArrayList<>());
+                invoice.setVendor(new Vendor());
             }
+            invoice.setCategory(categoryService.getDefault());
+            invoice.setUsername(user.getUsername());
+            invoice.setTenantId(user.getTenantId());
+            fileStorageService.save(image);
+            invoice.setFilename(image.getOriginalFilename());
+            return invoiceRepository.save(invoice);
         }catch (Exception e){
             throw new ImageException("Something went wrong with the image");
         }
@@ -184,17 +142,9 @@ public class InvoiceServiceImpl implements InvoiceService {
         if(invoice1 == null){
             throw new InvoiceNotFoundException("Invoice not found");
         }
-        List<String> errors = validateInvoice(invoice);
-        if(errors.size() > 0){
-            throw new InvoiceUpdateException(errors.toString());
-        }
-        if(invoice1.getErrors().size() > 0){
-            invoice1.setStatus("work");
-        }else{
-            invoice1.setStatus("done");
-        }
         ModelMapper modelMapper = new ModelMapper();
         modelMapper.map(invoice,invoice1);
+        invoice1.setCategory(categoryService.getByName(token,invoice.getCategoryName()));
         invoice1.setLastModifiedDate(new Date());
         return invoiceRepository.save(invoice1);
     }
@@ -208,52 +158,32 @@ public class InvoiceServiceImpl implements InvoiceService {
         invoiceRepository.deleteById(id);
     }
 
-    @Override
-    public Stats getStats(String token) {
-        String tenantId = tokenUtils.getTenantFromToken(token);
-        Stats stats = new Stats();
-        Month current = new Month();
-        Month prev = new Month();
-        Month prev2 = new Month();
-        current.setTotalPrice(getTotalPrice(invoiceRepository.getAllByCreatedDateBetweenAndTenantId(getDate(-1),getDate(0),tenantId)));
-        current.setTotal(invoiceRepository.countByCreatedDateBetweenAndTenantId(getDate(-1),getDate(0),tenantId));
-        prev.setTotalPrice(getTotalPrice(invoiceRepository.getAllByCreatedDateBetweenAndTenantId(getDate(-2),getDate(-1),tenantId)));
-        prev.setTotal(invoiceRepository.countByCreatedDateBetweenAndTenantId(getDate(-2),getDate(-1),tenantId));
-        prev2.setTotalPrice(getTotalPrice(invoiceRepository.getAllByCreatedDateBetweenAndTenantId(getDate(-3),getDate(-2),tenantId)));
-        prev2.setTotal(invoiceRepository.countByCreatedDateBetweenAndTenantId(getDate(-3),getDate(-2),tenantId));
-        stats.setBeforeCurrentMonth1(prev);
-        stats.setBeforeCurrentMonth2(prev2);
-        stats.setCurrentMonth(current);
-        stats.setTotalPrice(invoiceRepository.sumTotalPriceAndTenantId(tenantId));
-        stats.setCount(invoiceRepository.countAllByTenantId(tenantId) - 1);
-        return stats;
-    }
-
-    public double getTotalPrice(List<Invoice> invoiceList){
-        Double total = 0.0;
-        for (Invoice invoice:invoiceList) {
-            total += invoice.getTotal();
+    private Invoice mapInvoiceDTO(com.api.invoice.dto.external.InvoiceDTO invoiceDTO){
+        Invoice invoice = new Invoice();
+        invoice.setCurrency(getValue(invoiceDTO.getCurrency()));
+        invoice.setNumber(getValue(invoiceDTO.getNumber()));
+        invoice.setTotal(getValue(invoiceDTO.getTotal()));
+        invoice.setSubtotal(getValue(invoiceDTO.getSubtotal()));
+        invoice.setDueDate(getValue(invoiceDTO.getDueDate()));
+        invoice.setInvoiceDate(getValue(invoiceDTO.getInvoiceDate()));
+        invoice.setVendor(new Vendor(getValue(invoiceDTO.getVendor().getName()), getValue(invoiceDTO.getVendor().getAddress()), getValue(invoiceDTO.getVendor().getPhone()), getValue(invoiceDTO.getVendor().getEmail()), getValue(invoiceDTO.getVendor().getVatNumber())));
+        List<Line> lines = new ArrayList<Line>();
+        for (LineDTO line: invoiceDTO.getLines()) {
+            lines.add(new Line(getValue(line.getDescription()), getValue(line.getAmount()),getValue(line.getQuantity()).intValue(),getValue(line.getUnitPrice())));
         }
-        return total;
+        invoice.setLines(lines);
+        return invoice;
     }
 
-    public Date getDate(Integer number){
-        Calendar month = new GregorianCalendar();
-        month.add(Calendar.MONTH, number);
-        return month.getTime();
+    private String getValue(StringValue value){
+       return value.getValue();
     }
 
-    public List<String> validateInvoice(InvoiceDTO invoice){
-        List<String> errors = new ArrayList<>();
-        Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
-        Set<ConstraintViolation<InvoiceDTO>> violations = validator.validate(invoice);
-        for (ConstraintViolation violation: violations) {
-            errors.add(violation.getMessage());
-        }
-        return errors;
+    private Double getValue(FloatValue value){
+        return value.getValue();
     }
 
-    public static File convert(MultipartFile file)
+    private static File convert(MultipartFile file)
     {
         File convFile = new File(file.getOriginalFilename());
         try {

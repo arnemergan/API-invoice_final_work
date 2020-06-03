@@ -9,6 +9,7 @@ import com.api.invoice.repositories.TenantRepo;
 import com.api.invoice.repositories.UserRepo;
 import com.api.invoice.security.TokenUtils;
 import com.api.invoice.services.TenantService;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -30,13 +31,11 @@ public class TenantServiceImpl implements TenantService {
     public TenantDTO registerTenant(RegisterTenantDTO registerTenantDTO) {
         Tenant tenant = tenantRepo.save(mapTenant(registerTenantDTO,null));
         User adminUser = new User();
+        ModelMapper modelMapper = new ModelMapper();
+        modelMapper.map(adminUser,registerTenantDTO);
+        adminUser.setPassword(new BCryptPasswordEncoder().encode(registerTenantDTO.getPassword()));
         adminUser.setTenantId(tenant.getId());
         adminUser.setEnabled(true);
-        adminUser.setUsername(registerTenantDTO.getUsername());
-        adminUser.setFirstName(registerTenantDTO.getFirstName());
-        adminUser.setLastName(registerTenantDTO.getLastName());
-        adminUser.setEmail(registerTenantDTO.getEmail());
-        adminUser.setPassword(new BCryptPasswordEncoder().encode(registerTenantDTO.getPassword()));
         ArrayList<String> authorities = new ArrayList<>();
         authorities.add("ROLE_ADMIN");
         adminUser.setAuthorities(tokenUtils.getAuthorities(authorities));

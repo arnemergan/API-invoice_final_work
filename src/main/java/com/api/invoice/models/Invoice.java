@@ -4,10 +4,11 @@ import org.bson.types.Binary;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.mongodb.core.mapping.Document;
-
-import javax.persistence.*;
+import javax.persistence.CascadeType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.validation.Valid;
-import javax.validation.constraints.*;
 import java.util.Date;
 import java.util.List;
 
@@ -18,27 +19,19 @@ public class Invoice extends BaseSaasEntity {
     @LastModifiedDate
     private Date lastModifiedDate;
     private String number;
-    private String status;
-    private List<String> errors;
-    @Pattern(regexp = "^([0-2][0-9]|(3)[0-1])(\\/)(((0)[0-9])|((1)[0-2]))(\\/)\\d{4}$", message = "field must be a valid date")
     private String dueDate;
-    @Pattern(regexp = "^([0-2][0-9]|(3)[0-1])(\\/)(((0)[0-9])|((1)[0-2]))(\\/)\\d{4}$", message = "field must be a valid date")
     private String invoiceDate;
-    @PositiveOrZero(message = "field must be positive")
     private Double subtotal;
-    @Min(value = 0,message = "field must be between 0 and 21")
-    @Max(value = 21,message = "field must be between 0 and 21")
-    private Double VAT;
-    @PositiveOrZero(message = "field must be positive")
+    private Double vatNumber;
     private Double total;
     private String currency;
-    private Binary image;
+    private String filename;
+    private String username;
     @ManyToOne
     @JoinColumn
-    private User user;
+    private Category category;
     @ManyToOne
     @JoinColumn
-    @Valid
     private Vendor vendor;
     @OneToMany(mappedBy = "invoice", cascade = CascadeType.ALL)
     private List<@Valid Line> lines;
@@ -47,27 +40,19 @@ public class Invoice extends BaseSaasEntity {
         this.createdDate = new Date();
     }
 
-    public Invoice(String number, List<String> errors, String dueDate, String invoiceDate, Double subtotal, Double VAT, Double total, String currency, Binary image, Vendor vendor, List<Line> lines) {
-        this.errors = errors;
-        this.image = image;
+    public Invoice(Category category ,String number, String dueDate, String invoiceDate, Double subtotal, Double vatNumber, Double total, String currency, String filename, Vendor vendor, List<Line> lines) {
+        this.category = category;
+        this.filename = filename;
         this.number = number;
         this.dueDate = dueDate;
         this.invoiceDate = invoiceDate;
         this.subtotal = subtotal;
-        this.VAT = VAT;
+        this.vatNumber = vatNumber;
         this.total = total;
         this.currency = currency;
         this.vendor = vendor;
         this.lines = lines;
         this.createdDate = new Date();
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
     }
 
     public String getDueDate() {
@@ -94,12 +79,12 @@ public class Invoice extends BaseSaasEntity {
         this.subtotal = subtotal;
     }
 
-    public Double getVAT() {
-        return VAT;
+    public Double getVatNumber() {
+        return vatNumber;
     }
 
-    public void setVAT(Double VAT) {
-        this.VAT = VAT;
+    public void setVatNumber(Double vatNumber) {
+        this.vatNumber = vatNumber;
     }
 
     public Double getTotal() {
@@ -142,20 +127,12 @@ public class Invoice extends BaseSaasEntity {
         this.number = number;
     }
 
-    public Binary getImage() {
-        return image;
+    public String getFilename() {
+        return filename;
     }
 
-    public void setImage(Binary image) {
-        this.image = image;
-    }
-
-    public List<String> getErrors() {
-        return errors;
-    }
-
-    public void setErrors(List<String> errors) {
-        this.errors = errors;
+    public void setFilename(String filename) {
+        this.filename = filename;
     }
 
     public Date getCreatedDate() {
@@ -170,11 +147,19 @@ public class Invoice extends BaseSaasEntity {
         this.lastModifiedDate = lastModifiedDate;
     }
 
-    public User getUser() {
-        return user;
+    public String getUsername() {
+        return username;
     }
 
-    public void setUser(User user) {
-        this.user = user;
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public Category getCategory() {
+        return category;
+    }
+
+    public void setCategory(Category category) {
+        this.category = category;
     }
 }

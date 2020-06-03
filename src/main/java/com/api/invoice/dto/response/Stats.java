@@ -1,4 +1,6 @@
-package com.api.invoice.models;
+package com.api.invoice.dto.response;
+
+import com.api.invoice.dto.response.Month;
 
 public class Stats {
     private Integer count;

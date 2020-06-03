@@ -2,7 +2,10 @@ package com.api.invoice.models;
 
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import javax.persistence.*;
+import javax.persistence.CascadeType;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
+import javax.persistence.Transient;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.Pattern;
 import java.util.Set;
@@ -14,11 +17,8 @@ public class Vendor {
     private String id;
     private String name;
     private String address;
-    @Pattern(regexp = "^[+]*[(]{0,1}[0-9]{1,4}[)]{0,1}[-\\s\\./0-9]*$", message = "phone must be a valid phone number")
     private String phone;
-    @Email(message = "email must be a valid email")
     private String email;
-    @Pattern(regexp = "[A-Za-z]{2}[0-9|\\s]{8,15}$",message = "vatNumber must be a valid VATNumber")
     private String vatNumber;
     @Transient
     @OneToMany(mappedBy = "vendor", cascade = CascadeType.ALL)

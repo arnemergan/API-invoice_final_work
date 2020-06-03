@@ -1,4 +1,6 @@
 package com.api.invoice.dto.request;
+import com.api.invoice.models.Category;
+
 import javax.persistence.*;
 import javax.validation.Valid;
 import javax.validation.constraints.*;
@@ -19,10 +21,7 @@ public class InvoiceDTO {
     @NotNull(message = "vat cannot be empty")
     @Min(value = 0,message = "vat must be between 0 and 21")
     @Max(value = 21,message = "vat must be between 0 and 21")
-    private Double VAT;
-    @NotNull(message = "discount cannot be empty")
-    @PositiveOrZero(message = "field must be positive")
-    private Double discount;
+    private Double vatNumber;
     @NotNull(message = "total cannot be empty")
     @PositiveOrZero(message = "field must be positive")
     private Double total;
@@ -33,6 +32,7 @@ public class InvoiceDTO {
     @JoinColumn
     @Valid
     private VendorDTO vendor;
+    private String categoryName;
     @OneToMany(mappedBy = "invoice", cascade = CascadeType.ALL)
     private List<@Valid LineDTO> lines;
 
@@ -41,8 +41,7 @@ public class InvoiceDTO {
         this.dueDate = dueDate;
         this.invoiceDate = invoiceDate;
         this.subtotal = subtotal;
-        this.VAT = VAT;
-        this.discount = discount;
+        this.vatNumber = VAT;
         this.total = total;
         this.currency = currency;
         this.vendor = vendor;
@@ -77,12 +76,12 @@ public class InvoiceDTO {
         this.subtotal = subtotal;
     }
 
-    public Double getVAT() {
-        return VAT;
+    public Double getVatNumber() {
+        return vatNumber;
     }
 
-    public void setVAT(Double VAT) {
-        this.VAT = VAT;
+    public void setVatNumber(Double vatNumber) {
+        this.vatNumber = vatNumber;
     }
 
     public Double getTotal() {
@@ -125,11 +124,11 @@ public class InvoiceDTO {
         this.number = number;
     }
 
-    public Double getDiscount() {
-        return discount;
+    public String getCategoryName() {
+        return categoryName;
     }
 
-    public void setDiscount(Double discount) {
-        this.discount = discount;
+    public void setCategoryName(String categoryName) {
+        this.categoryName = categoryName;
     }
 }

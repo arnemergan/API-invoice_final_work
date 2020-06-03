@@ -10,7 +10,6 @@ public class RegisterTenantDTO {
     @NotNull(message = "name is required")
     @NotEmpty(message = "name is required")
     private String name;
-
     @NotNull(message = "country is required")
     @NotEmpty(message = "country is required")
     private String country;
