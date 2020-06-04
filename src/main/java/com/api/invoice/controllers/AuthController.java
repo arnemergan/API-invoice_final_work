@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import javax.validation.constraints.NotEmpty;
 
 @RestController
 @CrossOrigin(origins = "*", allowedHeaders = "*")
@@ -42,9 +43,9 @@ public class AuthController {
         return new ResponseEntity<>(userService.registerUser(registerDTO,request.getHeader("Authorization").split(" ")[1]), HttpStatus.OK);
     }
 
-    @GetMapping("/refresh/{token}")
-    public ResponseEntity<UserTokenDTO> refreshAuthenticationToken(HttpServletRequest request, @PathVariable String token) {
-        return new ResponseEntity<>(userDetailsService.refreshAuthenticationToken(request, token), HttpStatus.OK);
+    @GetMapping("/refresh-token")
+    public ResponseEntity<UserTokenDTO> refreshAuthenticationToken(HttpServletRequest request, @RequestParam @NotEmpty String token) {
+        return new ResponseEntity<>(userDetailsService.refreshAuthenticationToken(token,request.getHeader("Authorization").split(" ")[1]), HttpStatus.OK);
     }
 
     @GetMapping("/change-password-first")

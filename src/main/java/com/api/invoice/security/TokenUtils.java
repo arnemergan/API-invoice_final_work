@@ -1,5 +1,6 @@
 package com.api.invoice.security;
 
+import com.api.invoice.exceptions.ResourceNotFoundException;
 import com.api.invoice.models.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -83,7 +84,7 @@ public class TokenUtils {
     }
 
     public Boolean canTokenBeRefreshed(String refreshToken, String token) {
-        return !this.isTokenExpired(refreshToken) && this.isTokenExpired(token);
+       return !this.isTokenExpired(refreshToken) && getExpirationDateFromToken(token).getTime() < getExpirationDateFromToken(refreshToken).getTime();
     }
 
     public Boolean validateToken(String token, UserDetails userDetails) {
@@ -148,17 +149,6 @@ public class TokenUtils {
             issueAt = null;
         }
         return issueAt;
-    }
-
-    public String getAudienceFromToken(String token) {
-        String audience;
-        try {
-            final Claims claims = this.getAllClaimsFromToken(token);
-            audience = claims.getAudience();
-        } catch (Exception e) {
-            audience = null;
-        }
-        return audience;
     }
 
     public Date getExpirationDateFromToken(String token) {

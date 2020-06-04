@@ -4,6 +4,7 @@ import com.api.invoice.dto.request.LoginDTO;
 import com.api.invoice.dto.response.UserDTO;
 import com.api.invoice.dto.response.UserTokenDTO;
 import com.api.invoice.exceptions.ApiRequestException;
+import com.api.invoice.exceptions.ResourceNotFoundException;
 import com.api.invoice.repositories.UserRepo;
 import com.api.invoice.security.TokenUtils;
 import com.api.invoice.models.User;
@@ -106,10 +107,13 @@ public class UserDetailServiceImpl implements UserDetailsService {
         return userDto;
     }
 
-    public UserTokenDTO refreshAuthenticationToken(HttpServletRequest request, String refreshtoken) throws ApiRequestException {
-        if (tokenUtils.canTokenBeRefreshed(refreshtoken, tokenUtils.getToken(request))) {
+    public UserTokenDTO refreshAuthenticationToken(String refreshToken, String token){
+        if(token == null || refreshToken == null || token.isEmpty() || refreshToken.isEmpty()){
+            throw new ResourceNotFoundException("Token can not be refreshed.");
+        }
+        if (tokenUtils.canTokenBeRefreshed(refreshToken, token)) {
             UserTokenDTO userTokenDTO = new UserTokenDTO();
-            userTokenDTO.setAccessToken(tokenUtils.refreshToken(tokenUtils.getToken(request)));
+            userTokenDTO.setAccessToken(tokenUtils.refreshToken(token));
             userTokenDTO.setExpiresIn((long) tokenUtils.getExpiredIn());
             return userTokenDTO;
         } else {
