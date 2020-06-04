@@ -31,8 +31,10 @@ public class TenantServiceImpl implements TenantService {
     public TenantDTO registerTenant(RegisterTenantDTO registerTenantDTO) {
         Tenant tenant = tenantRepo.save(mapTenant(registerTenantDTO,null));
         User adminUser = new User();
-        ModelMapper modelMapper = new ModelMapper();
-        modelMapper.map(adminUser,registerTenantDTO);
+        adminUser.setFirstName(registerTenantDTO.getFirstName());
+        adminUser.setLastName(registerTenantDTO.getLastName());
+        adminUser.setUsername(registerTenantDTO.getUsername());
+        adminUser.setEmail(registerTenantDTO.getEmail());
         adminUser.setPassword(new BCryptPasswordEncoder().encode(registerTenantDTO.getPassword()));
         adminUser.setTenantId(tenant.getId());
         adminUser.setEnabled(true);
