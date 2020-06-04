@@ -5,6 +5,7 @@ import com.api.invoice.models.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -50,10 +51,11 @@ public class TokenUtils {
                 .signWith(SIGNATURE_ALGORITHM, SECRET).compact();
     }
 
-    public String generateRefreshToken(String username) {
+    public String generateRefreshToken(String username, String id) {
         return Jwts.builder()
                 .setIssuer(APP_NAME)
                 .setSubject(username)
+                .claim("tenant",id)
                 .setAudience(AUDIENCE_WEB)
                 .setIssuedAt(new Date())
                 .setExpiration(generateExpirationDateRefresh())
@@ -78,13 +80,13 @@ public class TokenUtils {
                     .setExpiration(generateExpirationDate())
                     .signWith(SIGNATURE_ALGORITHM, SECRET).compact();
         } catch (Exception e) {
-            refreshedToken = null;
+            refreshedToken = e.toString();
         }
         return refreshedToken;
     }
 
-    public Boolean canTokenBeRefreshed(String refreshToken, String token) {
-       return !this.isTokenExpired(refreshToken) && getExpirationDateFromToken(token).getTime() < getExpirationDateFromToken(refreshToken).getTime();
+    public Boolean canTokenBeRefreshed(String refreshToken) {
+       return !this.isTokenExpired(refreshToken);
     }
 
     public Boolean validateToken(String token, UserDetails userDetails) {
@@ -92,8 +94,7 @@ public class TokenUtils {
         final String username = getUsernameFromToken(token);
         final Date created = getIssuedAtDateFromToken(token);
 
-        return (username != null && username.equals(userDetails.getUsername())
-                && !isCreatedBeforeLastPasswordReset(created, user.getLastPasswordResetDate()));
+        return (username != null && username.equals(userDetails.getUsername()) && !isCreatedBeforeLastPasswordReset(created, user.getLastPasswordResetDate()));
     }
 
     private Boolean isCreatedBeforeLastPasswordReset(Date created, Date lastPasswordReset) {

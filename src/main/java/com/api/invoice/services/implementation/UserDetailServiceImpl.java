@@ -101,7 +101,7 @@ public class UserDetailServiceImpl implements UserDetailsService {
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String jwt = tokenUtils.generateToken(user.getUsername(),user.getTenantId());
         int expiresIn = tokenUtils.getExpiredIn();
-        String refresh = tokenUtils.generateRefreshToken(user.getUsername());
+        String refresh = tokenUtils.generateRefreshToken(user.getUsername(),user.getTenantId());
         UserDTO userDto = new UserDTO(user);
         userDto.setToken(new UserTokenDTO(jwt, expiresIn,refresh));
         return userDto;
@@ -111,9 +111,9 @@ public class UserDetailServiceImpl implements UserDetailsService {
         if(token == null || refreshToken == null || token.isEmpty() || refreshToken.isEmpty()){
             throw new ResourceNotFoundException("Token can not be refreshed.");
         }
-        if (tokenUtils.canTokenBeRefreshed(refreshToken, token)) {
+        if (tokenUtils.canTokenBeRefreshed(refreshToken)) {
             UserTokenDTO userTokenDTO = new UserTokenDTO();
-            userTokenDTO.setAccessToken(tokenUtils.refreshToken(token));
+            userTokenDTO.setAccessToken(tokenUtils.refreshToken(refreshToken));
             userTokenDTO.setExpiresIn((long) tokenUtils.getExpiredIn());
             return userTokenDTO;
         } else {
