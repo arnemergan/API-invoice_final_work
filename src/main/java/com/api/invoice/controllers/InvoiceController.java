@@ -8,6 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -48,16 +49,24 @@ public class InvoiceController {
     public Invoice GetInvoice(@PathVariable String id,HttpServletRequest request){
         return invoiceServiceClass.getInvoice(id,request.getHeader("Authorization").split(" ")[1]);
     }
+    @GetMapping(path = "/done")
+    @PreAuthorize("hasRole('ROLE_EDIT') or hasRole('ROLE_ADMIN')")
+    public Invoice GetInvoiceDone(@RequestParam String id,HttpServletRequest request,@RequestParam boolean done){
+        return invoiceServiceClass.setDone(request.getHeader("Authorization").split(" ")[1],id,done);
+    }
     @PostMapping(path = "/upload")
+    @PreAuthorize("hasRole('ROLE_EDIT') or hasRole('ROLE_ADMIN')")
     public Invoice CreateInvoice(@ModelAttribute("image") MultipartFile  image, @ModelAttribute("lang") String language, HttpServletRequest request) throws IOException {
         return invoiceServiceClass.uploadInvoice(image,language,request.getHeader("Authorization").split(" ")[1]);
     }
     @PutMapping(path = "/update/{id}")
     @CrossOrigin
+    @PreAuthorize("hasRole('ROLE_EDIT') or hasRole('ROLE_ADMIN')")
     public Invoice UpdateInvoice(@PathVariable String id, @RequestBody @Valid InvoiceDTO invoice, HttpServletRequest request){
         return invoiceServiceClass.updateInvoice(id,invoice,request.getHeader("Authorization").split(" ")[1]);
     }
     @DeleteMapping(path = "/delete/{id}")
+    @PreAuthorize("hasRole('ROLE_EDIT') or hasRole('ROLE_ADMIN')")
     public void DeleteInvoice(@PathVariable String id,HttpServletRequest request){
         invoiceServiceClass.deleteInvoice(id,request.getHeader("Authorization").split(" ")[1]);
     }

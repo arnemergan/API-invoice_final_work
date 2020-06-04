@@ -85,6 +85,16 @@ public class InvoiceServiceImpl implements InvoiceService {
     }
 
     @Override
+    public Invoice setDone(String token, String id, boolean done) {
+        Invoice invoice = invoiceRepository.getByIdAndTenantId(id,tokenUtils.getTenantFromToken(token));
+        if(invoice == null){
+            throw new InvoiceNotFoundException("Invoice not found");
+        }
+        invoice.setDone(done);
+        return invoiceRepository.save(invoice);
+    }
+
+    @Override
     public Page<Invoice> getInvoices(Pageable pageable, String token) {
         return invoiceRepository.findAllByTenantId(tokenUtils.getTenantFromToken(token),pageable);
     }
@@ -125,6 +135,7 @@ public class InvoiceServiceImpl implements InvoiceService {
                 invoice.setLines(new ArrayList<>());
                 invoice.setVendor(new Vendor());
             }
+            invoice.setDone(false);
             invoice.setCategory(categoryService.getDefault());
             invoice.setUsername(user.getUsername());
             invoice.setTenantId(user.getTenantId());

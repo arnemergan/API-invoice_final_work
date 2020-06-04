@@ -17,4 +17,5 @@ public interface InvoiceService {
     public Resource getImage(String token, String filename);
     public Page<Invoice> getInvoicesOnCategory(Pageable pageable, String token, String name);
     public Page<Invoice> getInvoicesOnUsername(Pageable pageable, String token, String username);
+    public Invoice setDone(String token, String id,boolean done);
 }

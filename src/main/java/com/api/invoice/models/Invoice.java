@@ -1,6 +1,4 @@
 package com.api.invoice.models;
-
-import org.bson.types.Binary;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -27,6 +25,7 @@ public class Invoice extends BaseSaasEntity {
     private String currency;
     private String filename;
     private String username;
+    private boolean done;
     @ManyToOne
     @JoinColumn
     private Category category;
@@ -161,5 +160,13 @@ public class Invoice extends BaseSaasEntity {
 
     public void setCategory(Category category) {
         this.category = category;
+    }
+
+    public boolean isDone() {
+        return done;
+    }
+
+    public void setDone(boolean done) {
+        this.done = done;
     }
 }
