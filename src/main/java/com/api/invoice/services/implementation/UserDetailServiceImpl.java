@@ -20,8 +20,9 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
 import javax.servlet.http.HttpServletRequest;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 
 @Service
 public class UserDetailServiceImpl implements UserDetailsService {
@@ -67,8 +68,26 @@ public class UserDetailServiceImpl implements UserDetailsService {
         userRepository.save(user);
     }
 
+    public UserDTO changePasswordFirst(String newPassword, String username, String token) {
+        com.api.invoice.models.User user = userRepository.findUserByUsername(username);
+        Calendar date = new GregorianCalendar();
+        date.add(Calendar.DATE,-1);
+        if(!user.isEnabled() && user.getFirsTimePasswordReset().getTime() > date.getTime().getTime() && user.getFirsTimePasswordToken().equals(token)){
+            user.setPassword(passwordEncoder.encode(newPassword));
+            user.setEnabled(true);
+            userRepository.save(user);
+            return new UserDTO(user);
+        }
+        throw new ApiRequestException("Something went wrong");
+    }
+
     public UserDTO login(LoginDTO authenticationRequest) throws ApiRequestException {
         User user = (User) loadUserByUsername(authenticationRequest.getUsername());
+        Calendar date = new GregorianCalendar();
+        date.add(Calendar.DATE,-1);
+        if(!user.isEnabled() && user.getFirsTimePasswordReset().getTime() > date.getTime().getTime()){
+            throw new ApiRequestException("Password must be changed");
+        }
         Authentication authentication;
         try {
             authentication = authenticationManager
@@ -78,11 +97,10 @@ public class UserDetailServiceImpl implements UserDetailsService {
         } catch (BadCredentialsException e) {
             throw new ApiRequestException("Credentials are not valid!");
         }
-
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String jwt = tokenUtils.generateToken(user.getUsername(),user.getTenantId());
         int expiresIn = tokenUtils.getExpiredIn();
-        String refresh = tokenUtils.generateRefreshToken(user.getUsername(),user.getTenantId());
+        String refresh = tokenUtils.generateRefreshToken(user.getUsername());
         UserDTO userDto = new UserDTO(user);
         userDto.setToken(new UserTokenDTO(jwt, expiresIn,refresh));
         return userDto;

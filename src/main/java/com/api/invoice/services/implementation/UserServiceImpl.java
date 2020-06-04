@@ -3,12 +3,14 @@ import com.api.invoice.dto.request.AuthoritiesChangerDTO;
 import com.api.invoice.dto.request.LoginDTO;
 import com.api.invoice.dto.request.RegisterDTO;
 import com.api.invoice.dto.request.UserInfoChangerDTO;
+import com.api.invoice.dto.response.RegisteredUserDTO;
 import com.api.invoice.dto.response.UserDTO;
 import com.api.invoice.dto.response.UserInfoAdminDTO;
 import com.api.invoice.dto.response.UserInfoDTO;
 import com.api.invoice.exceptions.ApiRequestException;
 import com.api.invoice.exceptions.ResourceNotFoundException;
 import com.api.invoice.exceptions.UserNameFoundException;
+import com.api.invoice.models.AuthorityEnum;
 import com.api.invoice.models.User;
 import com.api.invoice.repositories.TenantRepo;
 import com.api.invoice.repositories.UserRepo;
@@ -22,6 +24,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -33,7 +36,7 @@ public class UserServiceImpl implements UserService {
     private UserDetailServiceImpl userDetailService;
     @Autowired
     private TokenUtils tokenUtils;
-    public UserDTO registerUser(RegisterDTO registerDTO,String token) {
+    public RegisteredUserDTO registerUser(RegisterDTO registerDTO, String token) {
         String tenantId = tokenUtils.getTenantFromToken(token);
         if(tenantId.equals("")){
             throw new ApiRequestException("Not valid tenant id!");
@@ -45,17 +48,21 @@ public class UserServiceImpl implements UserService {
             throw new ApiRequestException("Max employees reached!");
         }
         User user = new User();
-        user.setAuthorities(tokenUtils.getAuthorities(registerDTO.getAuthorities()));
+        List<String> auth = new ArrayList<>();
+        auth.add("ROLE_VIEW");
+        user.setAuthorities(tokenUtils.getAuthorities(auth));
         user.setEmail(registerDTO.getEmail());
         user.setLastName(registerDTO.getLastName());
         user.setFirstName(registerDTO.getFirstName());
         user.setUsername(registerDTO.getUsername());
         user.setLastPasswordResetDate(new Date());
-        user.setEnabled(true);
+        user.setEnabled(false);
+        user.setFirsTimePasswordToken(UUID.randomUUID().toString());
+        user.setFirsTimePasswordReset(new Date());
         user.setPassword(new BCryptPasswordEncoder().encode(registerDTO.getPassword()));
         user.setTenantId(tenantId);
         userRepository.save(user);
-        return userDetailService.login(new LoginDTO(registerDTO.getUsername(),registerDTO.getPassword()));
+        return new RegisteredUserDTO(user.getUsername(),user.getFirsTimePasswordToken());
     }
 
     @Override
@@ -109,6 +116,11 @@ public class UserServiceImpl implements UserService {
         if(user == null){
             throw new UsernameNotFoundException("Username not found!");
         }
+        for (String auth: authoritiesChangerDTO.getAuthorities()) {
+            if(!auth.equals(AuthorityEnum.ADMIN.getAuth()) || !auth.equals(AuthorityEnum.VIEW.getAuth()) || !auth.equals(AuthorityEnum.EDIT.getAuth())){
+                throw new ResourceNotFoundException("Something went wrong");
+            }
+        }
         user.setAuthorities(tokenUtils.getAuthorities(authoritiesChangerDTO.getAuthorities()));
         userRepository.save(user);
         return mapUser(user);
@@ -137,6 +149,11 @@ public class UserServiceImpl implements UserService {
             userRepository.save(user);
         }
         return true;
+    }
+
+    @Override
+    public AuthorityEnum[] authorities() {
+        return AuthorityEnum.values();
     }
 
     private UserInfoAdminDTO mapUser(User user){

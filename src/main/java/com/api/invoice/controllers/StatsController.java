@@ -16,11 +16,12 @@ public class StatsController {
     @Autowired
     private StatisticsServiceImpl statisticsService;
 
+    @PreAuthorize("hasRole('ROLE_VIEW')")
     @GetMapping(path = {"/",""})
     public Stats GetStats(HttpServletRequest request){
         return statisticsService.getStats(request.getHeader("Authorization").split(" ")[1]);
     }
-
+    @PreAuthorize("hasRole('ROLE_VIEW')")
     @GetMapping(path = "/category")
     public Stats GetStatsOnCategory(HttpServletRequest request,@RequestParam String name){
         return statisticsService.getStatsOnCategory(request.getHeader("Authorization").split(" ")[1], name);

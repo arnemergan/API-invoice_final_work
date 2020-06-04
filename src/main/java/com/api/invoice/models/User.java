@@ -30,6 +30,12 @@ public class User extends BaseSaasEntity implements UserDetails {
     @Column(name = "last_password_reset_date")
     private Date lastPasswordResetDate;
 
+    @Column(name = "first", nullable = false)
+    private Date firsTimePasswordReset;
+
+    @Column(name = "token", nullable = false)
+    private String firsTimePasswordToken;
+
     @Column(name = "authorities", nullable = false)
     private Collection<? extends GrantedAuthority> authorities;
 
@@ -115,5 +121,21 @@ public class User extends BaseSaasEntity implements UserDetails {
 
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
+    }
+
+    public Date getFirsTimePasswordReset() {
+        return firsTimePasswordReset;
+    }
+
+    public void setFirsTimePasswordReset(Date firsTimePasswordReset) {
+        this.firsTimePasswordReset = firsTimePasswordReset;
+    }
+
+    public String getFirsTimePasswordToken() {
+        return firsTimePasswordToken;
+    }
+
+    public void setFirsTimePasswordToken(String firsTimePasswordToken) {
+        this.firsTimePasswordToken = firsTimePasswordToken;
     }
 }

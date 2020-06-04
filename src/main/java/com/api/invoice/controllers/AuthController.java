@@ -4,9 +4,11 @@ import com.api.invoice.dto.request.LoginDTO;
 import com.api.invoice.dto.request.PasswordChangerDTO;
 import com.api.invoice.dto.request.RegisterDTO;
 import com.api.invoice.dto.request.UserInfoChangerDTO;
+import com.api.invoice.dto.response.RegisteredUserDTO;
 import com.api.invoice.dto.response.UserDTO;
 import com.api.invoice.dto.response.UserInfoDTO;
 import com.api.invoice.dto.response.UserTokenDTO;
+import com.api.invoice.models.User;
 import com.api.invoice.services.implementation.UserDetailServiceImpl;
 import com.api.invoice.services.implementation.UserServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,13 +38,18 @@ public class AuthController {
 
     @PostMapping("/register")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<UserDTO> register(@RequestBody @Valid RegisterDTO registerDTO,HttpServletRequest request) {
+    public ResponseEntity<RegisteredUserDTO> register(@RequestBody @Valid RegisterDTO registerDTO, HttpServletRequest request) {
         return new ResponseEntity<>(userService.registerUser(registerDTO,request.getHeader("Authorization").split(" ")[1]), HttpStatus.OK);
     }
 
     @GetMapping("/refresh/{token}")
     public ResponseEntity<UserTokenDTO> refreshAuthenticationToken(HttpServletRequest request, @PathVariable String token) {
         return new ResponseEntity<>(userDetailsService.refreshAuthenticationToken(request, token), HttpStatus.OK);
+    }
+
+    @GetMapping("/change-password-first")
+    public ResponseEntity<UserDTO> changePassword(@RequestBody @Valid PasswordChangerDTO passwordChanger, @RequestParam String token, @RequestParam String user) {
+        return new ResponseEntity<>(userDetailsService.changePasswordFirst(passwordChanger.getNewPassword(),user,token),HttpStatus.OK);
     }
 
     @PostMapping("/change-password")
@@ -57,7 +64,13 @@ public class AuthController {
     }
 
     @PostMapping("/update")
-    public ResponseEntity<UserInfoDTO> refreshAuthenticationToken(@RequestBody @Valid UserInfoChangerDTO userInfoChangerDTO, HttpServletRequest request) {
+    public ResponseEntity<UserInfoDTO> updateUserInfo(@RequestBody @Valid UserInfoChangerDTO userInfoChangerDTO, HttpServletRequest request) {
         return new ResponseEntity<>(userService.updateUserInfo(request.getHeader("Authorization").split(" ")[1],userInfoChangerDTO), HttpStatus.OK);
+    }
+
+    @GetMapping("/authorities")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity getAuthorities() {
+        return new ResponseEntity<>(userService.authorities(), HttpStatus.OK);
     }
 }

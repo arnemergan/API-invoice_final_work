@@ -1,11 +1,16 @@
 package com.api.invoice.dto.request;
 
+import org.hibernate.validator.constraints.Length;
+
 import javax.validation.constraints.Email;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 
 public class RegisterDTO {
+    @Length(min=8, max=20,message = "username must be between 8 and 20")
     @NotNull(message = "username is required")
+    @NotEmpty(message = "username is required")
     private String username;
     @NotNull(message = "firstName is required")
     private String firstName;
@@ -14,10 +19,10 @@ public class RegisterDTO {
     @NotNull(message = "email is required")
     @Email(message = "email is required")
     private String email;
+    @Length(min=8, max=100,message = "password is required")
+    @NotEmpty(message = "password is required")
     @NotNull(message = "password is required")
     private String password;
-    @NotNull(message = "authorities is required")
-    private List<String> authorities;
 
     public String getUsername() {
         return username;
@@ -49,14 +54,6 @@ public class RegisterDTO {
 
     public void setEmail(String email) {
         this.email = email;
-    }
-
-    public List<String> getAuthorities() {
-        return authorities;
-    }
-
-    public void setAuthorities(List<String> authorities) {
-        this.authorities = authorities;
     }
 
     public String getPassword() {

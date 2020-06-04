@@ -53,6 +53,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .antMatchers("/authenticate/login").permitAll()
                 .antMatchers("/tenant/**").permitAll()
                 .antMatchers("/authenticate/info").permitAll()
+                .antMatchers("/authenticate/change-password-first").permitAll()
                 .antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .anyRequest().authenticated().and()
                 .exceptionHandling().authenticationEntryPoint(restAuthenticationEntryPoint)
@@ -63,6 +64,6 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     @Override
     public void configure(WebSecurity web) throws Exception {
         web.ignoring().antMatchers(HttpMethod.GET, "/", "/webjars/**", "/*.html", "/favicon.ico", "/**/*.html", "/**/*.css", "/**/*.js");
-        web.ignoring().antMatchers(HttpMethod.POST, "/authenticate/login","/tenant/register");
+        web.ignoring().antMatchers(HttpMethod.POST, "/authenticate/login","/tenant/register","/authenticate/change-password-first");
     }
 }

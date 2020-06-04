@@ -49,11 +49,10 @@ public class TokenUtils {
                 .signWith(SIGNATURE_ALGORITHM, SECRET).compact();
     }
 
-    public String generateRefreshToken(String username, String id) {
+    public String generateRefreshToken(String username) {
         return Jwts.builder()
                 .setIssuer(APP_NAME)
                 .setSubject(username)
-                .claim("tenant",id)
                 .setAudience(AUDIENCE_WEB)
                 .setIssuedAt(new Date())
                 .setExpiration(generateExpirationDateRefresh())
