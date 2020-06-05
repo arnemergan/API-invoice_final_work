@@ -48,7 +48,7 @@ public class AuthController {
         return new ResponseEntity<>(userDetailsService.refreshAuthenticationToken(token,request.getHeader("Authorization").split(" ")[1]), HttpStatus.OK);
     }
 
-    @GetMapping("/change-password-first")
+    @PostMapping("/change-password-first")
     public ResponseEntity<UserDTO> changePassword(@RequestBody @Valid PasswordChangerDTO passwordChanger, @RequestParam String token, @RequestParam String user) {
         return new ResponseEntity<>(userDetailsService.changePasswordFirst(passwordChanger.getNewPassword(),user,token),HttpStatus.OK);
     }

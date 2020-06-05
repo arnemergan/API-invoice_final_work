@@ -35,9 +35,12 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private UserDetailServiceImpl userDetailService;
     @Autowired
+    private EmailService emailService;
+    @Autowired
     private TokenUtils tokenUtils;
     public RegisteredUserDTO registerUser(RegisterDTO registerDTO, String token) {
         String tenantId = tokenUtils.getTenantFromToken(token);
+        String tok = UUID.randomUUID().toString();
         if(tenantId.equals("")){
             throw new ApiRequestException("Not valid tenant id!");
         }
@@ -57,10 +60,15 @@ public class UserServiceImpl implements UserService {
         user.setUsername(registerDTO.getUsername());
         user.setLastPasswordResetDate(new Date());
         user.setEnabled(false);
-        user.setFirsTimePasswordToken(UUID.randomUUID().toString());
+        user.setFirsTimePasswordToken(tok);
         user.setFirsTimePasswordReset(new Date());
         user.setPassword(new BCryptPasswordEncoder().encode(registerDTO.getPassword()));
         user.setTenantId(tenantId);
+        try{
+            emailService.sendEmail(registerDTO.getEmail(),tok,registerDTO.getUsername());
+        }catch (Exception e){
+            throw new ApiRequestException("Email sending went wrong");
+        }
         userRepository.save(user);
         return new RegisteredUserDTO(user.getUsername(),user.getFirsTimePasswordToken());
     }

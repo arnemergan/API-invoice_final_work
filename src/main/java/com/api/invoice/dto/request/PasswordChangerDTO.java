@@ -1,13 +1,20 @@
 package com.api.invoice.dto.request;
 
+import org.hibernate.validator.constraints.Length;
+
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
 public class PasswordChangerDTO {
 
-    @NotNull(message = "Old password is required")
+    @Length(min=8, max=100,message = "old password is required")
+    @NotEmpty(message = "old password is required")
+    @NotNull(message = "old password is required")
     private String oldPassword;
 
-    @NotNull(message = "New password is required")
+    @Length(min=8, max=100,message = "new password is required")
+    @NotEmpty(message = "new password is required")
+    @NotNull(message = "new password is required")
     private String newPassword;
 
     public PasswordChangerDTO() {
