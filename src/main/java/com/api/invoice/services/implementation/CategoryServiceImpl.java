@@ -71,8 +71,8 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public Category getByName(String token, String name) {
-        Category category = categoryRepo.getCategoryByNameAndTenantIdOrDeletableAndName(tokenUtils.getTenantFromToken(token),name,false, name);
-        if(category == null){
+        Category category = categoryRepo.getCategoryByName(name);
+        if(category == null && !category.getTenantId().equals(tokenUtils.getTenantFromToken(token))){
             return getDefault();
         }
         return category;
