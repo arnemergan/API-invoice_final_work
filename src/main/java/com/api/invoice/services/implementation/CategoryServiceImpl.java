@@ -72,12 +72,11 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public Category getByName(String token, String name) {
         Category category = categoryRepo.getCategoryByName(name);
-
         if(category == null){
-            return getDefault();
+            throw new ApiRequestException("Request not valid");
         }
         if(category.getTenantId().equals(tokenUtils.getTenantFromToken(token))){
-            return getDefault();
+            throw new ApiRequestException("Request not valid");
         }
         return category;
     }
