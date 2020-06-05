@@ -76,7 +76,7 @@ public class CategoryServiceImpl implements CategoryService {
             throw new ApiRequestException("Request not valid");
         }
         if(category.isDeletable()){
-            if(category.getTenantId().equals(tokenUtils.getTenantFromToken(token))){
+            if(!category.getTenantId().equals(tokenUtils.getTenantFromToken(token))){
                 throw new ApiRequestException("Request not valid");
             }
         }
