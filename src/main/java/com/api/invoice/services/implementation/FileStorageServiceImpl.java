@@ -1,10 +1,13 @@
 package com.api.invoice.services.implementation;
 
+import com.api.invoice.exceptions.ApiRequestException;
+import com.api.invoice.exceptions.ImageException;
 import com.api.invoice.services.FileStorageService;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
 import org.springframework.util.FileSystemUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -12,6 +15,7 @@ import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.stream.Stream;
 
 @Service
@@ -30,8 +34,17 @@ public class FileStorageServiceImpl implements FileStorageService {
 
     @Override
     public void save(MultipartFile file) {
+        if(file.isEmpty()){
+            throw new ImageException("No image provided");
+        }
+        if(file.getOriginalFilename() == null){
+            throw new ImageException("No filename provided");
+        }
+        if(file.getOriginalFilename().contains("..")){
+            throw new ImageException("No filename provided");
+        }
         try {
-            Files.copy(file.getInputStream(), this.root.resolve(file.getOriginalFilename()));
+            Files.copy(file.getInputStream(), this.root.resolve(StringUtils.cleanPath(file.getOriginalFilename())), StandardCopyOption.REPLACE_EXISTING);
         } catch (Exception e) {
             throw new RuntimeException("Could not store the file. Error: " + e.getMessage());
         }
@@ -42,7 +55,6 @@ public class FileStorageServiceImpl implements FileStorageService {
         try {
             Path file = root.resolve(filename);
             Resource resource = new UrlResource(file.toUri());
-
             if (resource.exists() || resource.isReadable()) {
                 return resource;
             } else {

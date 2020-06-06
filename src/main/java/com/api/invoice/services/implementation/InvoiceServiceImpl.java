@@ -8,6 +8,7 @@ import com.api.invoice.dto.response.Stats;
 import com.api.invoice.exceptions.ApiRequestException;
 import com.api.invoice.exceptions.ImageException;
 import com.api.invoice.exceptions.InvoiceNotFoundException;
+import com.api.invoice.external.OcrandNlpServiceImpl;
 import com.api.invoice.models.*;
 import com.api.invoice.repositories.InvoicesRepo;
 import com.api.invoice.repositories.UserRepo;
@@ -24,6 +25,7 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.data.domain.Pageable;
@@ -44,8 +46,8 @@ public class InvoiceServiceImpl implements InvoiceService {
     private FileStorageServiceImpl fileStorageService;
     @Autowired
     private CategoryServiceImpl categoryService;
-
-    private final String uri = "https://final-work-python.herokuapp.com/api/v1/ocr?language=";
+    @Autowired
+    private OcrandNlpServiceImpl ocrandNlpService;
 
     @Override
     public Invoice getInvoice(String id, String token) {
@@ -109,38 +111,22 @@ public class InvoiceServiceImpl implements InvoiceService {
             throw new ImageException("Image must be included");
         }
         try {
-            Invoice invoice = new Invoice();
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-            MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-            body.add("image", new FileSystemResource(convert(image)));
-            HttpEntity<MultiValueMap<String, Object>> entity = new HttpEntity<>(body, headers);
-            ResponseEntity response = new RestTemplate().postForEntity(uri + lang, entity, String.class);
-            if (response.getStatusCode() == HttpStatus.OK) {
-                ObjectMapper objectMapper = new ObjectMapper();
-                try {
-                    invoice = mapInvoiceDTO(objectMapper.readValue(response.getBody().toString(), com.api.invoice.dto.external.InvoiceDTO.class));
-                }catch (JsonProcessingException ex){
-                    throw new ImageException(ex.toString());
-                }
-                if(invoice.getVendor() == null){
-                    invoice.setVendor(new Vendor());
-                }
-                if(invoice.getLines() == null){
-                    invoice.setLines(new ArrayList<>());
-                }
-            }else if(response.getStatusCode() == HttpStatus.BAD_REQUEST || response.getStatusCode() == HttpStatus.INTERNAL_SERVER_ERROR){
-                throw new ImageException("Error during processing image");
-            }else{
-                invoice.setLines(new ArrayList<>());
+            Invoice invoice = mapInvoiceDTO(ocrandNlpService.getInvoice(image,lang));
+            if(invoice == null){
+                throw new ImageException("Something went wrong with the image");
+            }
+            if(invoice.getVendor() == null){
                 invoice.setVendor(new Vendor());
+            }
+            if(invoice.getLines() == null){
+                invoice.setLines(new ArrayList<>());
             }
             invoice.setDone(false);
             invoice.setCategory(categoryService.getDefault());
             invoice.setUsername(user.getUsername());
             invoice.setTenantId(user.getTenantId());
             fileStorageService.save(image);
-            invoice.setFilename(image.getOriginalFilename());
+            invoice.setFilename(StringUtils.cleanPath(image.getOriginalFilename()));
             return invoiceRepository.save(invoice);
         }catch (Exception e){
             throw new ImageException("Something went wrong with the image");
@@ -170,6 +156,9 @@ public class InvoiceServiceImpl implements InvoiceService {
     }
 
     private Invoice mapInvoiceDTO(com.api.invoice.dto.external.InvoiceDTO invoiceDTO){
+        if(invoiceDTO == null){
+            return null;
+        }
         Invoice invoice = new Invoice();
         invoice.setCurrency(getValue(invoiceDTO.getCurrency()));
         invoice.setNumber(getValue(invoiceDTO.getNumber()));
@@ -192,19 +181,5 @@ public class InvoiceServiceImpl implements InvoiceService {
 
     private Double getValue(FloatValue value){
         return value.getValue();
-    }
-
-    private static File convert(MultipartFile file)
-    {
-        File convFile = new File(file.getOriginalFilename());
-        try {
-            convFile.createNewFile();
-            FileOutputStream fos = new FileOutputStream(convFile);
-            fos.write(file.getBytes());
-            fos.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return convFile;
     }
 }
