@@ -7,7 +7,7 @@ import java.util.Collection;
 import java.util.List;
 
 public class AuthoritiesChangerDTO {
-    @NotNull(message = "authorities is required")
+    @NotNull(message = "username is required")
     private String username;
     @NotNull(message = "authorities is required")
     private List<String> authorities;

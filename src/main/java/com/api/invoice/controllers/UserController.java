@@ -1,5 +1,6 @@
 package com.api.invoice.controllers;
 import com.api.invoice.dto.request.AuthoritiesChangerDTO;
+import com.api.invoice.dto.request.EnableUserDTO;
 import com.api.invoice.dto.response.UserInfoAdminDTO;
 import com.api.invoice.models.User;
 import com.api.invoice.services.implementation.UserServiceImpl;
@@ -10,6 +11,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -25,10 +27,10 @@ public class UserController {
         return userService.getUsersTenant(request.getHeader("Authorization").split(" ")[1]);
     }
 
-    @DeleteMapping(path = "/{username}")
+    @PutMapping(path = "/enable")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<UserInfoAdminDTO> Delete(HttpServletRequest request,@PathVariable String username){
-        return new ResponseEntity<>(userService.disableUser(request.getHeader("Authorization").split(" ")[1],username),HttpStatus.OK);
+    public ResponseEntity<UserInfoAdminDTO> Delete(HttpServletRequest request, @RequestBody @Valid EnableUserDTO enableUserDTO){
+        return new ResponseEntity<>(userService.disableUser(request.getHeader("Authorization").split(" ")[1],enableUserDTO.getUsername(),enableUserDTO.isEnable()),HttpStatus.OK);
     }
 
     @PutMapping(path = "/")

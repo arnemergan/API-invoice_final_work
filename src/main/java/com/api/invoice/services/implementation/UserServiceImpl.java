@@ -125,7 +125,7 @@ public class UserServiceImpl implements UserService {
             throw new UsernameNotFoundException("Username not found!");
         }
         for (String auth: authoritiesChangerDTO.getAuthorities()) {
-            if(!auth.equals(AuthorityEnum.ADMIN.getAuth()) || !auth.equals(AuthorityEnum.VIEW.getAuth()) || !auth.equals(AuthorityEnum.EDIT.getAuth())){
+            if(!auth.equals(AuthorityEnum.ADMIN.getAuth()) && !auth.equals(AuthorityEnum.VIEW.getAuth()) && !auth.equals(AuthorityEnum.EDIT.getAuth())){
                 throw new ResourceNotFoundException("Something went wrong");
             }
         }
@@ -135,18 +135,18 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserInfoAdminDTO disableUser(String token, String username) {
+    public UserInfoAdminDTO disableUser(String token, String username, boolean enable) {
         User user = userRepository.findUserByUsername(username);
         if(user == null){
             throw new UsernameNotFoundException("Username not found!");
         }
-        user.setEnabled(false);
+        user.setEnabled(enable);
         userRepository.save(user);
         return mapUser(user);
     }
 
     @Override
-    public boolean disableUsersTenant(String token) {
+    public void disableUsersTenant(String token) {
         String tenantId = tokenUtils.getTenantFromToken(token);
         if(tenantId == null){
             throw new ResourceNotFoundException("Tenant id not found");
@@ -156,7 +156,6 @@ public class UserServiceImpl implements UserService {
             user.setEnabled(false);
             userRepository.save(user);
         }
-        return true;
     }
 
     @Override

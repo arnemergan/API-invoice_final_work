@@ -18,7 +18,7 @@ public interface UserService {
     public UserInfoDTO updateUserInfo(String token, UserInfoChangerDTO userInfoChangerDTO);
     public List<UserInfoAdminDTO> getUsersTenant(String token);
     public UserInfoAdminDTO updateUserAuthorities(String token, AuthoritiesChangerDTO authoritiesChangerDTO);
-    public UserInfoAdminDTO disableUser(String token, String username);
-    public boolean disableUsersTenant(String token);
+    public UserInfoAdminDTO disableUser(String token, String username,boolean enable);
+    public void disableUsersTenant(String token);
     public AuthorityEnum[] authorities();
 }

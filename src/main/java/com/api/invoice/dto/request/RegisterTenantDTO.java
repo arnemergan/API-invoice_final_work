@@ -13,10 +13,10 @@ public class RegisterTenantDTO {
     @NotNull(message = "country is required")
     @NotEmpty(message = "country is required")
     private String country;
-    @Range(min=10, max=100)
+    @Range(min=10, max=25)
     @NotNull(message = "maxEmployees is required")
     private int maxEmployees;
-    @Length(min=8, max=20,message = "username is required")
+    @Length(min=8, max=20,message = "username must be between 8 and 20")
     @NotNull(message = "username is required")
     @NotEmpty(message = "username is required")
     private String username;
@@ -30,7 +30,7 @@ public class RegisterTenantDTO {
     @NotNull(message = "email is required")
     @Email(message = "email is required")
     private String email;
-    @Length(min=8, max=100,message = "password is required")
+    @Length(min=8, max=100,message = "password must be between 8 and 100")
     @NotEmpty(message = "password is required")
     @NotNull(message = "password is required")
     private String password;

@@ -19,7 +19,7 @@ public class RegisterDTO {
     @NotNull(message = "email is required")
     @Email(message = "email is required")
     private String email;
-    @Length(min=8, max=100,message = "password is required")
+    @Length(min=8, max=100,message = "password must be between 8 and 10")
     @NotEmpty(message = "password is required")
     @NotNull(message = "password is required")
     private String password;

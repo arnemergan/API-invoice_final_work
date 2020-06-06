@@ -6,13 +6,11 @@ import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
 public class PasswordChangerDTO {
-
-    @Length(min=8, max=100,message = "old password is required")
     @NotEmpty(message = "old password is required")
     @NotNull(message = "old password is required")
     private String oldPassword;
 
-    @Length(min=8, max=100,message = "new password is required")
+    @Length(min=8, max=100,message = "new password must be between 8 and 100")
     @NotEmpty(message = "new password is required")
     @NotNull(message = "new password is required")
     private String newPassword;

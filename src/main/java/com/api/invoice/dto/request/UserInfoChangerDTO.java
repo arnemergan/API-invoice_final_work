@@ -1,9 +1,19 @@
 package com.api.invoice.dto.request;
 
+import org.hibernate.validator.constraints.Length;
+
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+
 public class UserInfoChangerDTO {
+    @Length(min=8, max=20,message = "username must be between 8 and 20")
+    @NotEmpty(message = "username is required")
     private String username;
+    @NotEmpty(message = "firstname is required")
     private String firstName;
+    @NotEmpty(message = "lastname is required")
     private String lastName;
+    @NotEmpty(message = "email is required")
     private String email;
 
     public String getUsername() {
